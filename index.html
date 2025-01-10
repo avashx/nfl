@@ -127,7 +127,7 @@ a {
 }
 
 .app-body {
-	height: 90%;
+	height: 100%;
 	display: grid;
 	grid-template-columns: minmax(min-content, 175px) minmax(max-content, 1fr) minmax(
 			min-content,
@@ -511,7 +511,11 @@ a {
 	}
 }
   
-  
+  .map{
+    overflow:none;
+width:100%;
+display:none;
+  }
 
 .flat-button {
 	border-radius: 6px;
@@ -959,7 +963,7 @@ button {
         
         
 			</div>
-			<div>
+			<div class="app-body-main-content">
 				<section class="service-section">
 					<h2>Data & Records</h2>
 					<div class="service-section-header">
