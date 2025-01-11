@@ -1070,9 +1070,10 @@ button {
     // Set the width dynamically to 95% of screen width
     function adjustVizSize() {
         var windowWidth = window.innerWidth;
-        
+      console.log(windowWidth);
+
         // Adjust the height proportionally to the width
-        var width = windowWidth * 0.95;
+        var width = windowWidth * 0.85;
         var height = (width * 1027) / 1600; // Maintain aspect ratio (1600px width corresponds to 1027px height)
 
         // Apply the calculated width and height
