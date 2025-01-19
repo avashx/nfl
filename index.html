@@ -3,6 +3,22 @@
 
 <head>
 	<title>NFL Project NSUT</title>
+   <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico" />
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+        integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+        crossorigin="" />
+    <link rel="stylesheet" href="https://unpkg.com/@bopen/leaflet-area-selection@0.6.1/dist/index.css" />
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+        integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+        crossorigin=""></script>
+
+    <script src="https://unpkg.com/@bopen/leaflet-area-selection@0.6.1/dist/index.umd.js"></script>
+   
 <style>
 @import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
 
@@ -875,7 +891,88 @@ button {
 		box-shadow: 0 0 0 2px var(--c-gray-800), 0 0 0 4px var(--c-gray-300);
 	}
 }
-
+    .leaflet-control-attribution {
+    display:none;
+}
+        
+       
+        .main-container {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px;
+        }
+        
+        .map-container {
+            width: 65%;
+  background-color: rgba(225,195,205,0.09);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow:5px 7px 12px black;
+  backdrop-filter: blur(60px);
+        }
+        
+        #map {
+            width: 100%;
+            height: 600px;
+            background-color: #eaeaea;
+            border-radius: 8px;
+        }
+        
+        .data-container {
+            width: 30%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .chart, .data-table, .alerts, .control-panel {
+  background-color: rgba(225,195,205,0.09);
+            padding: 20px;
+            border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow:5px 7px 12px black;
+  backdrop-filter: blur(60px);        }
+        
+        canvas {
+            width: 100% !important;
+            height: 250px !important;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        table th, table td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        table th {
+        }
+        
+   
+        
+        .control-panel button {
+    width: 75%;
+    padding: 2% ;
+    margin: 3% 2%;
+    border-radius: 5px;
+    box-sizing: border-box;
+    box-shadow: 3px 3px #c20000;
+    text-align: center;
+		background-color: #c20000;
+		color: white;
+		}
+ button:hover{
+    transform: scale(1.05);
+    transition: all 0.3s ease-in-out;
+    background: linear-gradient(135deg, #F13846, #911f00);
+  }
+    
+        
 </style>
     
 </head>
@@ -912,6 +1009,59 @@ button {
 		<div class="app-body">
 		
 			<div class="app-body-main-content">
+        
+            <div class="main-container">
+        <div class="map-container">
+            <h2>Live Map</h2>
+            <div id="map"></div>
+        </div>
+
+        <div class="data-container">
+            <div class="chart">
+                <h2>Fertilizer Application</h2>
+                <canvas id="fertilizerChart"></canvas>
+            </div>
+
+            <div class="data-table">
+                <h2>Flight Data Logs</h2>
+                <table id="flight-log">
+                    <thead>
+                        <tr>
+                            <th>Flight ID</th>
+                            <th>Time</th>
+                            <th>Location</th>
+                            <th>Fertilizer Applied (kg)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Data rows will be inserted here via JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="alerts">
+                <h2>Alerts</h2>
+                <ul id="alert-list">
+                    <li>All systems normal.</li>
+                </ul>
+            </div>
+
+            <div class="control-panel">
+                <button id="start-flight-btn">Start Flight</button>
+                <button id="end-flight-btn">End Flight</button>
+            </div>
+        </div>
+    </div>
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
 				<section class="service-section">
 					<h2>Data & Records</h2>
 					<div class="service-section-header">
@@ -996,7 +1146,52 @@ button {
         
      </section>
        
-                   <br><br><br>  <section class="box"><div class='tableauPlaceholder' id='viz1737042499464' style='position: relative'><noscript><a href='#'><img alt='Fertilizer Consuption ' src='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;NF&#47;NFLproduction&#47;FertilizerConsuption&#47;1_rss.png' style='border: none' /></a></noscript><object class='tableauViz'  style='display:none;'><param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' /> <param name='embed_code_version' value='3' /> <param name='site_root' value='' /><param name='name' value='NFLproduction&#47;FertilizerConsuption' /><param name='tabs' value='no' /><param name='toolbar' value='yes' /><param name='static_image' value='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;NF&#47;NFLproduction&#47;FertilizerConsuption&#47;1.png' /> <param name='animate_transition' value='yes' /><param name='display_static_image' value='yes' /><param name='display_spinner' value='yes' /><param name='display_overlay' value='yes' /><param name='display_count' value='yes' /><param name='language' value='en-GB' /></object></div>                <script type='text/javascript'>                    var divElement = document.getElementById('viz1737042499464');                    var vizElement = divElement.getElementsByTagName('object')[0];                    vizElement.style.width='100%';vizElement.style.height=(divElement.offsetWidth*0.75)+'px';                    var scriptElement = document.createElement('script');                    scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';                    vizElement.parentNode.insertBefore(scriptElement, vizElement);                </script></section>
+                   <br><br><br>  <section class="box"><div class='tableauPlaceholder' id='viz1737042499464' style='position: relative'><noscript><a href='#'><img alt='Fertilizer Consuption ' src='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;NF&#47;NFLproduction&#47;FertilizerConsuption&#47;1_rss.png' style='border: none' /></a></noscript><object class='tableauViz'  style='display:none;'><param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' /> <param name='embed_code_version' value='3' /> <param name='site_root' value='' /><param name='name' value='NFLproduction&#47;FertilizerConsuption' /><param name='tabs' value='no' /><param name='toolbar' value='yes' /><param name='static_image' value='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;NF&#47;NFLproduction&#47;FertilizerConsuption&#47;1.png' /> <param name='animate_transition' value='yes' /><param name='display_static_image' value='yes' /><param name='display_spinner' value='yes' /><param name='display_overlay' value='yes' /><param name='display_count' value='yes' /><param name='language' value='en-GB' /></object></div>                <script type='text/javascript'>                    var divElement = document.getElementById('viz1737042499464');                    var vizElement = divElement.getElementsByTagName('object')[0];                    vizElement.style.width='100%';vizElement.style.height=(divElement.offsetWidth*0.75)+'px';                    var scriptElement = document.createElement('script');                    scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';                    vizElement.parentNode.insertBefore(scriptElement, vizElement);                </script>   
+                   
+                   
+                   
+                   
+                   <script >
+         const map = L.map('map').setView([28.592376, 77.349851], 15);
+
+const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: ' '
+}).addTo(map);
+
+const marker = L.marker([28.592376, 77.349851]).addTo(map)
+    .bindPopup('<b>NFL Project</b><br />Draw polygon to measure area.').openPopup();
+
+
+
+const polygon = L.polygon([
+    [28.591708, 77.348892],
+    [28.592177, 77.348424],
+    [28.592856, 77.349386],
+    [28.592376, 77.349851],
+]).addTo(map).bindPopup('NFL Area');
+
+
+const popup = L.popup()
+    .setLatLng([28.592267, 77.349081])
+    .setContent('NFL')
+    .openOn(map);
+
+function onMapClick(e) {
+    popup
+        .setLatLng(e.latlng)
+        .setContent(`You clicked the map at ${e.latlng.toString()}`)
+        .openOn(map);
+}
+
+map.on('click', onMapClick);
+
+const areaSelection = new window.leafletAreaSelection.DrawAreaSelection();
+map.addControl(areaSelection);
+
+
+        </script>
+    </section>
                    
      </center> 
 			</div>

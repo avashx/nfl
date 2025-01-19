@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ 
+    <title>Drone Fertilizer Monitoring Dashboard</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico" />
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+        integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+        crossorigin="" />
+    <link rel="stylesheet" href="https://unpkg.com/@bopen/leaflet-area-selection@0.6.1/dist/index.css" />
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+        integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+        crossorigin=""></script>
+
+    <script src="https://unpkg.com/@bopen/leaflet-area-selection@0.6.1/dist/index.umd.js"></script>
+    <style>/* General Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        #map { 
+  height: 100vh;
+}
+
+.leaflet-popup-content-wrapper {
+  width: 100%;
+}
+
+        
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+        }
+        
+       
+        .leaflet-control-attribution {
+    display:none;
+}
+        
+       
+        .main-container {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px;
+        }
+        
+        .map-container {
+            width: 65%;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        #map {
+            width: 100%;
+            height: 600px;
+            background-color: #eaeaea;
+            border-radius: 8px;
+        }
+        
+        .data-container {
+            width: 30%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .chart, .data-table, .alerts, .control-panel {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        canvas {
+            width: 100% !important;
+            height: 250px !important;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        table th, table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        table th {
+            background-color: #f2f2f2;
+        }
+        
+   
+        
+        .control-panel button {
+            padding: 10px;
+            font-size: 16px;
+            background-color: #0078d4;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+        }
+        
+        .control-panel button:hover {
+            background-color: #005c8e;
+        }
+        
+     
+        </style>
+</head>
+<body>
+   
+
+    <div class="main-container">
+        <div class="map-container">
+            <h2>Live Map</h2>
+            <div id="map"></div>
+        </div>
+
+        <div class="data-container">
+            <div class="chart">
+                <h2>Fertilizer Application</h2>
+                <canvas id="fertilizerChart"></canvas>
+            </div>
+
+            <div class="data-table">
+                <h2>Flight Data Logs</h2>
+                <table id="flight-log">
+                    <thead>
+                        <tr>
+                            <th>Flight ID</th>
+                            <th>Time</th>
+                            <th>Location</th>
+                            <th>Fertilizer Applied (kg)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Data rows will be inserted here via JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="alerts">
+                <h2>Alerts</h2>
+                <ul id="alert-list">
+                    <li>All systems normal.</li>
+                </ul>
+            </div>
+
+            <div class="control-panel">
+                <button id="start-flight-btn">Start Flight</button>
+                <button id="end-flight-btn">End Flight</button>
+            </div>
+        </div>
+    </div>
+
+   
+
+    <script >
+         const map = L.map('map').setView([28.592376, 77.349851], 15);
+
+const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: ' '
+}).addTo(map);
+
+const marker = L.marker([28.592376, 77.349851]).addTo(map)
+    .bindPopup('<b>NFL Project</b><br />Draw polygon to measure area.').openPopup();
+
+
+
+const polygon = L.polygon([
+    [28.591708, 77.348892],
+    [28.592177, 77.348424],
+    [28.592856, 77.349386],
+    [28.592376, 77.349851],
+]).addTo(map).bindPopup('NFL Area');
+
+
+const popup = L.popup()
+    .setLatLng([28.592267, 77.349081])
+    .setContent('NFL')
+    .openOn(map);
+
+function onMapClick(e) {
+    popup
+        .setLatLng(e.latlng)
+        .setContent(`You clicked the map at ${e.latlng.toString()}`)
+        .openOn(map);
+}
+
+map.on('click', onMapClick);
+
+const areaSelection = new window.leafletAreaSelection.DrawAreaSelection();
+map.addControl(areaSelection);
+
+
+        </script>
+    
+</body>
+</html>
