@@ -174,11 +174,11 @@
             </ul>
         </nav>
     </header>
-    <div id="map" style="width: 1200px; height: 800px;"></div>
+
     <div class="main-container">
         <div class="map-container">
             <h2>Live Map</h2>
-            
+            <div id="map" style="width: 1200px; height: 800px;"></div>
         </div>
 
         <div class="data-container">
@@ -222,42 +222,43 @@
         <p>&copy; 2025 Drone Monitoring Dashboard</p>
     </footer>
 
-    <script src="script.js"> const map = L.map('map').setView([28.592376, 77.349851], 13);
+    <script >
+         const map = L.map('map').setView([28.592376, 77.349851], 13);
 
-        const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        }).addTo(map);
+const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+}).addTo(map);
 
-        const marker = L.marker([28.592376, 77.349851]).addTo(map)
-            .bindPopup('<b>NFL Project</b><br />Draw polygon to measure area.').openPopup();
-
-
-
-        const polygon = L.polygon([
-            [28.591708, 77.348892],
-            [28.592177, 77.348424],
-            [28.592856, 77.349386],
-            [28.592376, 77.349851],
-        ]).addTo(map).bindPopup('NFL Area');
+const marker = L.marker([28.592376, 77.349851]).addTo(map)
+    .bindPopup('<b>NFL Project</b><br />Draw polygon to measure area.').openPopup();
 
 
-        const popup = L.popup()
-            .setLatLng([28.592267, 77.349081])
-            .setContent('NFL')
-            .openOn(map);
 
-        function onMapClick(e) {
-            popup
-                .setLatLng(e.latlng)
-                .setContent(`You clicked the map at ${e.latlng.toString()}`)
-                .openOn(map);
-        }
+const polygon = L.polygon([
+    [28.591708, 77.348892],
+    [28.592177, 77.348424],
+    [28.592856, 77.349386],
+    [28.592376, 77.349851],
+]).addTo(map).bindPopup('NFL Area');
 
-        map.on('click', onMapClick);
 
-        const areaSelection = new window.leafletAreaSelection.DrawAreaSelection();
-        map.addControl(areaSelection);
+const popup = L.popup()
+    .setLatLng([28.592267, 77.349081])
+    .setContent('NFL')
+    .openOn(map);
+
+function onMapClick(e) {
+    popup
+        .setLatLng(e.latlng)
+        .setContent(`You clicked the map at ${e.latlng.toString()}`)
+        .openOn(map);
+}
+
+map.on('click', onMapClick);
+
+const areaSelection = new window.leafletAreaSelection.DrawAreaSelection();
+map.addControl(areaSelection);
 
 
         </script>
