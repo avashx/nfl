@@ -9,12 +9,32 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drone Fertilizer Monitoring Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Leaflet.js CDN for Interactive Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+
+     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>/* General Styles */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
+        #map { 
+  height: 100vh;
+}
+
+.leaflet-popup-content-wrapper {
+  width: 100%;
+}
+
         
         body {
             font-family: Arial, sans-serif;
@@ -244,6 +264,29 @@
                 }
             });
         });
+
+
+var map = L.map('map', {
+    center: [38.89, -77.03],
+    zoom: 11
+});
+ 
+
+var tiles = new L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+  minZoom: '15'}).addTo(map);
+
+var marker = L.marker(
+  [38.89, -77.03],
+  { 
+    draggable: true,
+    title: "",
+    opacity: 0.75
+});
+
+marker.addTo(map).bindPopup("<p1><b>The White House</b><br>Landmark, historic home & office of the United States president, with tours for visitors.</p1>") .openPopup();
+
+
         </script>
     
 </body>
