@@ -62,13 +62,9 @@
         
         #map {
             width: 100%;
-            height: 300px;
+            height: 400px;
             background-color: #eaeaea;
             border-radius: 8px;
-            text-align: center;
-            line-height: 300px;
-            font-size: 20px;
-            color: #333;
         }
         
         .data-container {
@@ -78,7 +74,7 @@
             gap: 20px;
         }
         
-        .chart, .alerts {
+        .chart, .data-table, .alerts, .control-panel {
             background-color: white;
             padding: 20px;
             border-radius: 8px;
@@ -88,6 +84,21 @@
         canvas {
             width: 100% !important;
             height: 250px !important;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        table th, table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        table th {
+            background-color: #f2f2f2;
         }
         
         .alerts ul {
@@ -101,6 +112,21 @@
             border-radius: 4px;
         }
         
+        .control-panel button {
+            padding: 10px;
+            font-size: 16px;
+            background-color: #0078d4;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+        }
+        
+        .control-panel button:hover {
+            background-color: #005c8e;
+        }
+        
         footer {
             background-color: #333;
             color: white;
@@ -111,6 +137,10 @@
             width: 100%;
         }
         </style>
+    <!-- Leaflet.js CDN for Interactive Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <header>
@@ -128,7 +158,7 @@
     <div class="main-container">
         <div class="map-container">
             <h2>Live Map</h2>
-            <div id="map">Map Placeholder</div>
+            <div id="map"></div>
         </div>
 
         <div class="data-container">
@@ -137,11 +167,33 @@
                 <canvas id="fertilizerChart"></canvas>
             </div>
 
+            <div class="data-table">
+                <h2>Flight Data Logs</h2>
+                <table id="flight-log">
+                    <thead>
+                        <tr>
+                            <th>Flight ID</th>
+                            <th>Time</th>
+                            <th>Location</th>
+                            <th>Fertilizer Applied (kg)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Data rows will be inserted here via JS -->
+                    </tbody>
+                </table>
+            </div>
+
             <div class="alerts">
                 <h2>Alerts</h2>
                 <ul id="alert-list">
                     <li>All systems normal.</li>
                 </ul>
+            </div>
+
+            <div class="control-panel">
+                <button id="start-flight-btn">Start Flight</button>
+                <button id="end-flight-btn">End Flight</button>
             </div>
         </div>
     </div>
@@ -150,48 +202,93 @@
         <p>&copy; 2025 Drone Monitoring Dashboard</p>
     </footer>
 
-    <script src="script.js">// Simulate fertilizer data and alert updates
-        document.addEventListener("DOMContentLoaded", function() {
-            const alertList = document.getElementById("alert-list");
-        
-            // Example of adding alerts
-            function addAlert(message) {
-                const alertItem = document.createElement("li");
-                alertItem.textContent = message;
-                alertList.appendChild(alertItem);
-            }
-        
-            // Simulate new alerts every 5 seconds
-            setInterval(() => {
-                const randomAlert = Math.random() > 0.5
-                    ? "High fertilizer usage detected in zone 2"
-                    : "Fertilizer application successful.";
-                addAlert(randomAlert);
-            }, 5000);
-        
-            // Fertilizer Application Chart (Mock Data)
-            const ctx = document.getElementById("fertilizerChart").getContext("2d");
-            const fertilizerChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['Zone 1', 'Zone 2', 'Zone 3', 'Zone 4', 'Zone 5'],
-                    datasets: [{
-                        label: 'Fertilizer (kg/ha)',
-                        data: [20, 45, 35, 60, 25],
-                        backgroundColor: '#0078d4',
-                        borderColor: '#005c8e',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
+    <script src="script.js">document.addEventListener("DOMContentLoaded", function() {
+        // 1. Initialize Leaflet.js Map
+        const map = L.map('map').setView([51.505, -0.09], 13); // Initial position & zoom level
+    
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+    
+        // Add a marker to simulate drone position
+        const droneMarker = L.marker([51.505, -0.09]).addTo(map);
+        droneMarker.bindPopup("Drone Location").openPopup();
+    
+        // 2. Simulating Fertilizer Application Chart
+        const ctx = document.getElementById('fertilizerChart').getContext('2d');
+        const fertilizerChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Zone 1', 'Zone 2', 'Zone 3', 'Zone 4', 'Zone 5'],
+                datasets: [{
+                    label: 'Fertilizer (kg/ha)',
+                    data: [20, 45, 35, 60, 25],
+                    backgroundColor: '#0078d4',
+                    borderColor: '#005c8e',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
                     }
                 }
-            });
+            }
         });
-        </script>
+    
+        // 3. Simulating Flight Logs
+        let flightLogs = [
+            { id: 1, time: "10:00 AM", location: "Zone 1", fertilizer: 20 },
+            { id: 2, time: "10:15 AM", location: "Zone 2", fertilizer: 45 },
+            { id: 3, time: "10:30 AM", location: "Zone 3", fertilizer: 35 }
+        ];
+    
+        const flightLogTableBody = document.querySelector("#flight-log tbody");
+        flightLogs.forEach(log => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${log.id}</td>
+                <td>${log.time}</td>
+                <td>${log.location}</td>
+                <td>${log.fertilizer}</td>
+            `;
+            flightLogTableBody.appendChild(row);
+        });
+    
+        // 4. Real-Time Alerts
+        const alertList = document.getElementById("alert-list");
+        function addAlert(message) {
+            const alertItem = document.createElement("li");
+            alertItem.textContent = message;
+            alertList.appendChild(alertItem);
+        }
+    
+        setInterval(() => {
+            const randomAlert = Math.random() > 0.5 ? 
+                "Over-fertilization detected in Zone 2" :
+                "Fertilizer application successful.";
+            addAlert(randomAlert);
+        }, 5000);
+    
+        // 5. Control Panel - Start/Stop Flight
+        const startFlightBtn = document.getElementById('start-flight-btn');
+        const endFlightBtn = document.getElementById('end-flight-btn');
+    
+        startFlightBtn.addEventListener('click', () => {
+            addAlert("Flight started. Drone is flying...");
+            droneMarker.setPopupContent("Drone is in flight").openPopup();
+            startFlightBtn.disabled = true;
+            endFlightBtn.disabled = false;
+        });
+    
+        endFlightBtn.addEventListener('click', () => {
+            addAlert("Flight ended. Drone has landed.");
+            droneMarker.setPopupContent("Drone has landed").openPopup();
+            startFlightBtn.disabled = false;
+            endFlightBtn.disabled = true;
+        });
+    });
+    </script>
 </body>
 </html>
