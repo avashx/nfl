@@ -19,7 +19,21 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico" />
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+        integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+        crossorigin="" />
+    <link rel="stylesheet" href="https://unpkg.com/@bopen/leaflet-area-selection@0.6.1/dist/index.css" />
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+        integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+        crossorigin=""></script>
+
+    <script src="https://unpkg.com/@bopen/leaflet-area-selection@0.6.1/dist/index.umd.js"></script>
      <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>/* General Styles */
         * {
@@ -178,7 +192,7 @@
     <div class="main-container">
         <div class="map-container">
             <h2>Live Map</h2>
-            <div id="map"></div>
+            <div id="map" style="width: 1200px; height: 800px;"></div>
         </div>
 
         <div class="data-container">
@@ -222,69 +236,42 @@
         <p>&copy; 2025 Drone Monitoring Dashboard</p>
     </footer>
 
-    <script src="script.js">// Simulate fertilizer data and alert updates
-        document.addEventListener("DOMContentLoaded", function() {
-            const alertList = document.getElementById("alert-list");
-        
-            // Example of adding alerts
-            function addAlert(message) {
-                const alertItem = document.createElement("li");
-                alertItem.textContent = message;
-                alertList.appendChild(alertItem);
-            }
-        
-            // Simulate new alerts every 5 seconds
-            setInterval(() => {
-                const randomAlert = Math.random() > 0.5
-                    ? "High fertilizer usage detected in zone 2"
-                    : "Fertilizer application successful.";
-                addAlert(randomAlert);
-            }, 5000);
-        
-            // Fertilizer Application Chart (Mock Data)
-            const ctx = document.getElementById("fertilizerChart").getContext("2d");
-            const fertilizerChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['Zone 1', 'Zone 2', 'Zone 3', 'Zone 4', 'Zone 5'],
-                    datasets: [{
-                        label: 'Fertilizer (kg/ha)',
-                        data: [20, 45, 35, 60, 25],
-                        backgroundColor: '#0078d4',
-                        borderColor: '#005c8e',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
-        });
+    <script src="script.js"> const map = L.map('map').setView([28.592376, 77.349851], 13);
+
+        const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(map);
+
+        const marker = L.marker([28.592376, 77.349851]).addTo(map)
+            .bindPopup('<b>NFL Project</b><br />Draw polygon to measure area.').openPopup();
 
 
-var map = L.map('map', {
-    center: [38.89, -77.03],
-    zoom: 11
-});
- 
 
-var tiles = new L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-  minZoom: '15'}).addTo(map);
+        const polygon = L.polygon([
+            [28.591708, 77.348892],
+            [28.592177, 77.348424],
+            [28.592856, 77.349386],
+            [28.592376, 77.349851],
+        ]).addTo(map).bindPopup('NFL Area');
 
-var marker = L.marker(
-  [38.89, -77.03],
-  { 
-    draggable: true,
-    title: "",
-    opacity: 0.75
-});
 
-marker.addTo(map).bindPopup("<p1><b>The White House</b><br>Landmark, historic home & office of the United States president, with tours for visitors.</p1>") .openPopup();
+        const popup = L.popup()
+            .setLatLng([28.592267, 77.349081])
+            .setContent('NFL')
+            .openOn(map);
+
+        function onMapClick(e) {
+            popup
+                .setLatLng(e.latlng)
+                .setContent(`You clicked the map at ${e.latlng.toString()}`)
+                .openOn(map);
+        }
+
+        map.on('click', onMapClick);
+
+        const areaSelection = new window.leafletAreaSelection.DrawAreaSelection();
+        map.addControl(areaSelection);
 
 
         </script>
