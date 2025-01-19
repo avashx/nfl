@@ -28,7 +28,7 @@
 
 
 
-    <div id="map" style="width: 600px; height: 400px;"></div>
+    <div id="map" style="width: 1200px; height: 800px;"></div>
     <script>
 
         const map = L.map('map').setView([28.592376, 77.349851], 13);
@@ -39,7 +39,7 @@
         }).addTo(map);
 
         const marker = L.marker([28.592376, 77.349851]).addTo(map)
-            .bindPopup('<b>Hello world!</b><br />I am a popup.').openPopup();
+            .bindPopup('<b>NFL Project</b><br />Draw polygon to measure area.').openPopup();
 
 
 
