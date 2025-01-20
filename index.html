@@ -950,10 +950,15 @@ margin:2%;
             gap: 20px;
         }
 
+
+  .warn {display:none;}
+
 @media only screen and (max-width: 800px) {
 
   .data-container{display:none;}
-  
+  .warn {display:block;
+  color:red;
+  }
    .map-container {
      width: 100%;}
   
@@ -1052,7 +1057,8 @@ button:hover{
 		<div class="app-body">
 		
 			<div class="app-body-main-content">
-        
+        <center>	<p class="warn">Please use big screen to view content properly</p></center>
+
             <div class="main-container">
         <div class="map-container">
             <h2>Live Map</h2>
@@ -1077,7 +1083,7 @@ button:hover{
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- Data rows will be inserted here via JS -->
+                        
                     </tbody>
                 </table>
             </div>
