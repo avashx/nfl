@@ -53,7 +53,29 @@ body {
 	padding-top: 3vw;
 	padding-bottom: 3vw;
 	justify-content: center;
+
+
+background: linear-gradient(-45deg, #000000, #082e04, #76044e);
+background-size: 400% 400%;
+ animation: gradient 15s ease infinite;
+	backdrop-filter:blur(4px);
+  z-index:-5;
 }
+		
+@keyframes gradient {
+	0% {
+		background-position: 0% 50%;
+	}
+	50% {
+		background-position: 100% 50%;
+	}
+	100% {
+		background-position: 0% 50%;
+	}
+}
+
+
+
 
 *,
 *:before,
@@ -92,31 +114,49 @@ a {
     padding: 2vw 4vw 6vw;
     display: flex;
     flex-direction: column;
+background-color: rgba(4, 23, 2, 0.5);
+  box-shadow: 4px 4px 12px black;
+  backdrop-filter: blur(60px);
 }
 
+
 .app-header {
-	display: grid;
 	grid-template-columns: minmax(min-content, 175px) minmax(max-content, 1fr) minmax(
 			max-content,
 			400px
 		);
 	column-gap: 4rem;
 	align-items: flex-end;
-	@media (max-width: 1200px) {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
 		border-bottom: 1px solid var(--c-gray-600);
-	}
+	
 }
 
 .app-header-navigation {
 	@media (min-width: 1200px) {
-		display: none;
 	}
 }
 
 
+.app-header-actions {
+	display: flex;
+	align-items: center;
+	@media (min-width: 1200px) {
+	}
+}
+
+.app-header-actions-buttons {
+	display: flex;
+	border-left: 1px solid var(--c-gray-600);
+	margin-left: 2rem;
+	padding-left: 2rem;
+
+	& > * + * {
+		margin-left: 1rem;
+	}
+}
 
 
 
@@ -457,6 +497,16 @@ a {
 .service-section-footer {
 	color: var(--c-text-tertiary);
 	margin-top: 1rem;
+}
+
+.service {
+	color: var(--c-text-tertiary);
+  text-align: right;
+  font-size: 0.7rem;
+}
+.service span {
+	color: white;
+  font-size: 0.8rem;
 }
 
 .search-field {
@@ -940,7 +990,8 @@ margin:2%;
   }
    .map-container {
      width: 100%;}
-  
+  .app-header-actions, .app-header-actions-buttons  {display:none;  }
+
   }
         
         .chart, .data-table, .alerts, .control-panel {
@@ -1018,7 +1069,20 @@ button:hover{
 					</h1>
 				</div>
 			</div>
-			
+			<div class="app-header-actions">
+<div class="service">
+<p>  <span>WINTER PROJECT</span><br>NETAJI SUBHAS UNIVERSITY OF TECHNOLOGY
+</p>
+					</div>
+				<div class="app-header-actions-buttons">
+
+						<i class="ph-magnifying-glass"></i>
+					</button>
+					<button class="icon-button large">
+						<i class="ph-bell"></i>
+					</button>
+				</div>
+			</div>
 
 	
 		</header>
