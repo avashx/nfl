@@ -18,7 +18,10 @@
         crossorigin=""></script>
 
     <script src="https://unpkg.com/@bopen/leaflet-area-selection@0.6.1/dist/index.umd.js"></script>
-   
+      <link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css">
+    <script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
 <style>
 @import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
 
@@ -513,9 +516,12 @@ margin:2%;
 		transform: translateY(-50%);
 	}
 }
+  
+  .val{		color: var(--c-text-tertiary);
+} 
 
 .dropdown-field {
-	display: flex;
+
 	flex-grow: 1;
 	position: relative;
 	select {
@@ -990,10 +996,7 @@ margin:2%;
 
   .data-table{          overflow:auto;}
         
-        canvas {
-            width: 100% !important;
-            height: 150px !important;
-        }
+
         
         table {
             width: 100%;
@@ -1082,8 +1085,33 @@ button:hover{
 
         <div class="data-container">
             <div class="chart">
-                <h2>Fertilizer Application</h2>
-                <canvas id="fertilizerChart"></canvas>
+                <h2>Fertilizer Application</h2><br>    <p>Area: <span class="val" id="area-display">0 m²</span></p>
+   <div class="dropdown-field"><label for="crop-type">Select Crop Type:</label>
+        <select id="crop-type">
+            <option value="rice" data-fertilizer="25">Rice (25 L/ha)</option>
+            <option value="wheat" data-fertilizer="20">Wheat (20 L/ha)</option>
+            <option value="millets" data-fertilizer="15">Millets (15 L/ha)</option>
+            <option value="pulses" data-fertilizer="10">Pulses (10 L/ha)</option>
+            <option value="tea" data-fertilizer="30">Tea (30 L/ha)</option>
+            <option value="coffee" data-fertilizer="35">Coffee (35 L/ha)</option>
+            <option value="sugarcane" data-fertilizer="40">Sugarcane (40 L/ha)</option>
+            <option value="oilseeds" data-fertilizer="18">Oil Seeds (18 L/ha)</option>
+            <option value="cotton" data-fertilizer="25">Cotton (25 L/ha)</option>
+            <option value="jute" data-fertilizer="20">Jute (20 L/ha)</option>
+     </select></div>
+        <br>
+      <div class="dropdown-field">  <label for="drone-capacity">Select Drone Tank Capacity:</label>
+        <select id="drone-capacity">
+            <option value="12">12 L</option>
+            <option value="20" selected>20 L</option>
+            <option value="45">45 L</option>
+            <option value="60">60 L</option>
+            <option value="84">84 L</option>
+              </select></div>
+        <p>Fertilizer Required: <span class="val" id="fertilizer-required">0 L</span></p>
+        <p>Drone Refills Needed: <span class="val" id="drone-refills">0</span></p>
+        <p>Est. Drone Flight Time: <span class="val" id="flight-time">0 minutes</span></p>
+               
             </div>
 
             <div class="data-table">
@@ -1227,47 +1255,128 @@ var divElement = document.getElementById('viz1737034738534');                   
                    
                    
                    
-                   
-                   <script >
-         const map = L.map('map').setView([28.592376, 77.349851], 15);
+ <script>
+        function createAreaTooltip(layer) {
+            if(layer.areaTooltip) {
+                return;
+            }
 
-const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: ' '
-}).addTo(map);
+            layer.areaTooltip = L.tooltip({
+                permanent: true,
+                direction: 'center',
+                className: 'area-tooltip'
+            });
 
-const marker = L.marker([28.592376, 77.349851]).addTo(map)
-    .bindPopup('<b>NFL Project</b><br />Draw polygon to measure area.').openPopup();
+            layer.on('remove', function(event) {
+                layer.areaTooltip.remove();
+            });
 
+            layer.on('add', function(event) {
+                updateAreaTooltip(layer);
+                layer.areaTooltip.addTo(map);
+            });
 
+            if(map.hasLayer(layer)) {
+                updateAreaTooltip(layer);
+                layer.areaTooltip.addTo(map);
+            }
+        }
 
-const polygon = L.polygon([
-    [28.591708, 77.348892],
-    [28.592177, 77.348424],
-    [28.592856, 77.349386],
-    [28.592376, 77.349851],
-]).addTo(map).bindPopup('NFL Area');
+        function updateAreaTooltip(layer) {
+            var area = L.GeometryUtil.geodesicArea(layer.getLatLngs()[0]);
+            var readableArea = L.GeometryUtil.readableArea(area, true);
+            var latlng = layer.getCenter();
 
+            layer.areaTooltip
+                .setContent(readableArea)
+                .setLatLng(latlng);
 
-const popup = L.popup()
-    .setLatLng([28.592267, 77.349081])
-    .setContent('NFL')
-    .openOn(map);
+            // Update the area in the <p> element
+            document.getElementById('area-display').textContent = readableArea;
+                      // Calculate and update fertilizer and drone refills
+            updateFertilizerAndRefills(area);
+ }
+  function updateFertilizerAndRefills(area) {
+            var cropType = document.getElementById('crop-type');
+            var fertilizerRate = parseFloat(cropType.selectedOptions[0].getAttribute('data-fertilizer'));
 
-function onMapClick(e) {
-    popup
-        .setLatLng(e.latlng)
-        .setContent(`You clicked the map at ${e.latlng.toString()}`)
-        .openOn(map);
-}
+            // Convert area to hectares (1 ha = 10,000 m²)
+            var areaInHectares = area / 10000;
 
-map.on('click', onMapClick);
+            // Calculate fertilizer required
+            var fertilizerRequired = areaInHectares * fertilizerRate;
+            document.getElementById('fertilizer-required').textContent = fertilizerRequired.toFixed(2) + ' L';
 
-const areaSelection = new window.leafletAreaSelection.DrawAreaSelection();
-map.addControl(areaSelection);
+            // Get drone capacity from dropdown
+            var droneCapacity = parseInt(document.getElementById('drone-capacity').value);
 
+            // Calculate drone refills
+            var droneRefills = Math.ceil(fertilizerRequired / droneCapacity);
+            document.getElementById('drone-refills').textContent = droneRefills;
 
-        </script>
+            // Estimate drone flight time dynamically (7 minutes per refill + 3 minutes setup time per refill)
+            var flightTime = (droneRefills * 7) + (droneRefills * 3);
+            document.getElementById('flight-time').textContent = flightTime + ' min';
+        }
+        var map = L.map('map').setView([28.592376, 77.349851], 15);
+
+        L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        var polygon = L.polygon([
+            [28.591708, 77.348892],
+            [28.592177, 77.348424],
+            [28.592856, 77.349386],
+            [28.592376, 77.349851],
+        ]).addTo(map);
+
+        createAreaTooltip(polygon);
+
+        /**
+         * EXAMPLE WITH LEAFLET DRAW CONTROL
+         */
+        var drawnItems = L.featureGroup().addTo(map);
+
+        map.addControl(new L.Control.Draw({
+            edit: {
+                featureGroup: drawnItems,
+                poly: {
+                    allowIntersection: false
+                }
+            },
+            draw: {
+                marker: false,
+                circle: false,
+                circlemarker: false,
+                rectangle: false,
+                polyline: false,
+                polygon: {
+                    allowIntersection: false,
+                    showArea: true
+                }
+            }
+        }));
+
+        map.on(L.Draw.Event.CREATED, function(event) {
+            var layer = event.layer;
+
+            if(layer instanceof L.Polygon) {
+                createAreaTooltip(layer);
+            }
+
+            drawnItems.addLayer(layer);
+        });
+
+        map.on(L.Draw.Event.EDITED, function(event) {
+            event.layers.getLayers().forEach(function(layer) {
+                if(layer instanceof L.Polygon) {
+                    updateAreaTooltip(layer);
+                }
+            });
+        });
+
+    </script>
     </section>
                    
      </center> 
