@@ -1375,7 +1375,16 @@ var divElement = document.getElementById('viz1737034738534');                   
                 }
             });
         });
+ // Update calculations when crop type or drone capacity changes
+        document.getElementById('crop-type').addEventListener('change', function() {
+            var area = L.GeometryUtil.geodesicArea(polygon.getLatLngs()[0]);
+            updateFertilizerAndRefills(area);
+        });
 
+        document.getElementById('drone-capacity').addEventListener('change', function() {
+            var area = L.GeometryUtil.geodesicArea(polygon.getLatLngs()[0]);
+            updateFertilizerAndRefills(area);
+        });
     </script>
     </section>
                    
