@@ -1,0 +1,969 @@
+<html>
+<head>
+    <title>NFL Project NSUT</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+        integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+        crossorigin="" />
+    <link rel="stylesheet" href="https://unpkg.com/@bopen/leaflet-area-selection@0.6.1/dist/index.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css">
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+        integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+        crossorigin=""></script>
+    <script src="https://unpkg.com/@bopen/leaflet-area-selection@0.6.1/dist/index.umd.js"></script>
+    <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
+    <!-- Add Turf.js for path generation -->
+    <script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+
+        :root {
+            --c-gray-900: #000000;
+            --c-gray-800: #1f1f1f;
+            --c-gray-700: #2e2e2e;
+            --c-gray-600: #313131;
+            --c-gray-500: #27b9d5;
+            --c-gray-400: #a6a6a6;
+            --c-gray-300: #bdbbb7;
+            --c-gray-200: #f1f1f1;
+            --c-gray-100: #ffffff;
+            --c-green-500: #45ffbc;
+            --c-olive-500: #e3ffa8;
+            --c-white: var(--c-gray-100);
+            --c-text-primary: var(--c-gray-100);
+            --c-text-secondary: var(--c-gray-200);
+            --c-text-tertiary: var(--c-gray-500);
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            line-height: 1.5;
+            min-height: 100vh;
+            font-family: "Be Vietnam Pro", sans-serif;
+            background-color: var(--c-gray-900);
+            color: var(--c-text-primary);
+            display: flex;
+            padding-top: 3vw;
+            padding-bottom: 3vw;
+            justify-content: center;
+            background: linear-gradient(-45deg, #000000, #082e04, #76044e);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            backdrop-filter: blur(4px);
+            z-index: -5;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        *, *:before, *:after {
+            box-sizing: border-box;
+        }
+
+        img {
+            display: block;
+            max-width: 100%;
+        }
+
+        button, select, input, textarea {
+            font: inherit;
+        }
+
+        a {
+            color: inherit;
+        }
+
+        .responsive-wrapper {
+            width: 90%;
+            max-width: 1600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .app {
+            height: max-content;
+            width: 95%;
+            max-width: 1600px;
+            background-color: #041702;
+            padding: 2vw 3vw 6vw;
+            display: flex;
+            flex-direction: column;
+            background-color: rgba(4, 23, 2, 0.5);
+            box-shadow: 4px 4px 12px black;
+            backdrop-filter: blur(60px);
+        }
+
+        .app-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--c-gray-600);
+        }
+
+        .app-header-actions {
+            display: flex;
+            align-items: center;
+        }
+
+        .app-header-actions-buttons {
+            display: flex;
+            border-left: 1px solid var(--c-gray-600);
+            margin-left: 2rem;
+            padding-left: 2rem;
+        }
+
+        .app-body {
+            height: 100%;
+            padding-top: 2.5rem;
+        }
+
+        .footer {
+            margin-top: auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            padding-bottom: 1rem;
+            padding-top: 1rem;
+            border-bottom: 1px solid var(--c-gray-600);
+        }
+
+        .logo-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 54px;
+            height: 54px;
+        }
+
+        .logo-title {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.25;
+            margin-left: 0.75rem;
+        }
+
+        .service {
+            color: #969593;
+            text-align: right;
+            font-size: 0.7rem;
+        }
+
+        .service span {
+            color: white;
+            font-size: 0.8rem;
+        }
+
+        .icon-button {
+            border-radius: 50%;
+            border: 0;
+            width: 72px;
+            height: 72px;
+            margin: 2%;
+            color: var(--c-text-primary);
+            cursor: pointer;
+            transition: 0.25s ease;
+        }
+
+        .icon-button:hover, .icon-button:focus {
+            transform: scale(1.05);
+            transition: all 0.3s ease-in-out;
+            color: white;
+            box-shadow: 0 0 0 4px var(--c-gray-800), 0 0 0 5px var(--c-text-tertiary);
+        }
+
+        .tiles {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            column-gap: 1rem;
+            row-gap: 1rem;
+            margin-top: 1.25rem;
+        }
+
+        .tile {
+            padding: 1rem;
+            border-radius: 8px;
+            background-color: var(--c-olive-500);
+            color: var(--c-gray-900);
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            transition: 0.25s ease;
+        }
+
+        .tile:hover {
+            transform: translateY(-5px);
+        }
+
+        .tile:nth-child(2) {
+            background-color: var(--c-green-500);
+        }
+
+        .tile:nth-child(3) {
+            background-color: var(--c-gray-300);
+        }
+
+        .service-section > h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .service-section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .service-section-footer {
+            color: var(--c-text-tertiary);
+            margin-top: 1rem;
+        }
+
+        .search-field {
+            display: flex;
+            flex-grow: 1;
+            position: relative;
+        }
+
+        .search-field input {
+            width: 100%;
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+            border: 0;
+            border-bottom: 1px solid var(--c-gray-600);
+            background-color: transparent;
+            padding-left: 1.5rem;
+        }
+
+        .dropdown-field {
+            flex-grow: 1;
+            position: relative;
+        }
+
+        .dropdown-field select {
+            width: 100%;
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+            border: 0;
+            border-bottom: 1px solid var(--c-gray-600);
+            background-color: transparent;
+            padding-right: 1.5rem;
+            appearance: none;
+            color: var(--c-text-tertiary);
+        }
+
+        .flat-button {
+            border-radius: 6px;
+            background-color: var(--c-gray-700);
+            padding: 0.5em 1.5em;
+            border: 0;
+            color: var(--c-text-secondary);
+            transition: 0.25s ease;
+            cursor: pointer;
+        }
+
+        .flat-button:hover, .flat-button:focus {
+            background-color: var(--c-gray-600);
+        }
+
+        .mobile-only {
+            display: none;
+        }
+
+        .box {
+            flex: 1;
+            min-width: 100%;
+            min-height: auto;
+            background-color: white;
+            align-items: center;
+            padding-bottom: 10px;
+            border: 1px solid #373F48;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            overflow: scroll;
+            color: #393838;
+            display: inline-block;
+            transition: .3s linear;
+            box-shadow: 5px 7px #888888;
+        }
+
+        .leaflet-control-attribution {
+            display: none;
+        }
+
+        ._37qQG button {
+            background-image: url("https://cdn-icons-png.flaticon.com/512/7168/7168063.png");
+            margin: 2%;
+            font-size: 15px;
+            height: 40px;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            color: white;
+        }
+
+        ._37qQG button:hover {
+            transform: scale(1.05);
+            transition: all 0.3s ease-in-out;
+            color: white;
+        }
+
+        ._37qQG button:active {
+            background: #b97ebb;
+            color: white;
+        }
+
+        .main-container {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px;
+        }
+
+        .map-container {
+            width: 68%;
+            height: fit-content;
+            background-color: rgba(225,195,205,0.09);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 5px 7px 12px black;
+            backdrop-filter: blur(60px);
+        }
+
+        #map {
+            width: 100%;
+            height: 600px;
+            background-color: #eaeaea;
+            border-radius: 8px;
+        }
+
+        .data-container {
+            width: 30%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .api {
+            display: block;
+            color: red;
+        }
+
+        .warn {
+            display: none;
+        }
+
+        @media only screen and (max-width: 800px) {
+            .data-container { display: none; }
+            .warn { display: block; color: red; }
+            .map-container { width: 100%; }
+            .app-header-actions, .app-header-actions-buttons { display: none; }
+        }
+
+        .chart, .data-table, .alerts, .control-panel {
+            background-color: rgba(225,195,205,0.09);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 5px 7px 12px black;
+            backdrop-filter: blur(60px);
+        }
+
+        .data-table {
+            overflow: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table th, table td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .control-panel button {
+            margin: 2%;
+            font-size: 15px;
+            height: 40px;
+            padding: 0px 30px;
+            border: none;
+            border-radius: 5px;
+            background: #157efb;
+            color: white;
+        }
+
+        button:hover {
+            background: #f5f5f5;
+            color: #157efb;
+        }
+
+        button:active {
+            background: #b97ebb;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <header class="app-header">
+            <div class="app-header-logo">
+                <div class="logo">
+                    <span class="logo-icon">
+                        <img src="https://upload.wikimedia.org/wikipedia/en/thumb/9/9e/National_Fertilizers_Logo.svg/800px-National_Fertilizers_Logo.svg.png" />
+                    </span>
+                    <h1 class="logo-title">
+                        <span>NFL</span>
+                        <span>Dashboard</span>
+                    </h1>
+                </div>
+            </div>
+            <div class="app-header-actions">
+                <div class="service">
+                    <p><span>WINTER PROJECT</span><br>NETAJI SUBHAS UNIVERSITY OF TECHNOLOGY</p>
+                </div>
+                <div class="app-header-actions-buttons">
+                    <div class="icon-button">
+                        <i class="ph-bell"><img src="https://upload.wikimedia.org/wikipedia/en/thumb/e/e9/Netaji_Subhas_University_of_Technology.svg/300px-Netaji_Subhas_University_of_Technology.svg.png"></i>
+                    </div>
+                </div>
+            </div>
+        </header>
+        <div class="app-body">
+            <div class="app-body-main-content">
+                <center><p class="warn">Please use big screen to view content properly</p></center>
+                <div class="main-container">
+                    <div class="map-container">
+                        <h2>Live Map</h2>
+                        <div id="map"></div><br>
+                        <center><p class="api">As API is no longer connected most of the function will not work!</p></center>
+                    </div>
+                    <div class="data-container">
+                        <div class="chart">
+                            <h2>Fertilizer Application</h2><br>
+                            <p>Area: <span class="val" id="area-display">0 m²</span></p>
+                            <p>Area Covered: <span class="val" id="area-covered">0%</span></p>
+                            <div class="dropdown-field">
+                                <label for="crop-type">Select Crop Type:</label>
+                                <select id="crop-type">
+                                    <option value="rice" data-fertilizer="25">Rice (25 L/ha)</option>
+                                    <option value="wheat" data-fertilizer="20">Wheat (20 L/ha)</option>
+                                    <option value="millets" data-fertilizer="15">Millets (15 L/ha)</option>
+                                    <option value="pulses" data-fertilizer="10">Pulses (10 L/ha)</option>
+                                    <option value="tea" data-fertilizer="30">Tea (30 L/ha)</option>
+                                    <option value="coffee" data-fertilizer="35">Coffee (35 L/ha)</option>
+                                    <option value="sugarcane" data-fertilizer="40">Sugarcane (40 L/ha)</option>
+                                    <option value="oilseeds" data-fertilizer="18">Oil Seeds (18 L/ha)</option>
+                                    <option value="cotton" data-fertilizer="25">Cotton (25 L/ha)</option>
+                                    <option value="jute" data-fertilizer="20">Jute (20 L/ha)</option>
+                                </select>
+                            </div>
+                            <br>
+                            <div class="dropdown-field">
+                                <label for="drone-capacity">Select Drone Tank Capacity:</label>
+                                <select id="drone-capacity">
+                                    <option value="12">12 L</option>
+                                    <option value="20" selected>20 L</option>
+                                    <option value="45">45 L</option>
+                                    <option value="60">60 L</option>
+                                    <option value="84">84 L</option>
+                                </select>
+                            </div>
+                            <p>Fertilizer Required: <span class="val" id="fertilizer-required">0 L</span></p>
+                            <p>Drone Refills Needed: <span class="val" id="drone-refills">0</span></p>
+                            <p>Est. Drone Flight Time: <span class="val" id="flight-time">0 minutes</span></p>
+                        </div>
+                        <div class="data-table">
+                            <h2>Flight Data Logs</h2>
+                            <table id="flight-log">
+                                <thead>
+                                    <tr>
+                                        <th>Flight ID</th>
+                                        <th>Time</th>
+                                        <th>Location</th>
+                                        <th>Fertilizer Applied (kg)</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                        <div class="alerts">
+                            <h2>Alerts</h2>
+                            <ul id="alert-list">
+                                <li>All systems normal.</li>
+                            </ul>
+                        </div>
+                        <div class="control-panel">
+                            <center>
+                                <button id="simulate-flight-btn">Simulate Flight</button>
+                                <button id="start-flight-btn">Start Flight</button>
+                                <button id="end-flight-btn">End Flight</button>
+                            </center>
+                        </div>
+                    </div>
+                </div>
+                <section class="service-section">
+                    <h2>Data & Records</h2>
+                    <div class="service-section-header">
+                        <div class="search-field">
+                            <i class="ph-magnifying-glass"></i>
+                            <input type="text" placeholder="District">
+                        </div>
+                        <div class="dropdown-field">
+                            <select>
+                                <option>State wise</option>
+                                <option>India</option>
+                            </select>
+                            <i class="ph-caret-down"></i>
+                        </div>
+                        <button class="flat-button">Search</button>
+                    </div>
+                    <div class="mobile-only">
+                        <button class="flat-button">Map</button>
+                    </div>
+                    <div class="tiles">
+                        <article class="tile">
+                            <div class="tile-header">
+                                <i class="ph-lightning-light"></i>
+                                <h3><span>Fertilizers</span><span>Consuption</span></h3>
+                            </div>
+                            <a href="#green">
+                                <span>District wise</span>
+                                <span class="icon-button"><i class="ph-caret-right-bold"></i></span>
+                            </a>
+                        </article>
+                        <article class="tile">
+                            <div class="tile-header">
+                                <i class="ph-fire-simple-light"></i>
+                                <h3><span>Urea</span><span>Consuption</span></h3>
+                            </div>
+                            <a href="#vmap">
+                                <span>District wise</span>
+                                <span class="icon-button"><i class="ph-caret-right-bold"></i></span>
+                            </a>
+                        </article>
+                        <article class="tile">
+                            <div class="tile-header">
+                                <i class="ph-file-light"></i>
+                                <h3><span>Crop</span><span>production</span></h3>
+                            </div>
+                            <a href="#bar">
+                                <span>District wise</span>
+                                <span class="icon-button"><i class="ph-caret-right-bold"></i></span>
+                            </a>
+                        </article>
+                    </div>
+                    <div class="service-section-footer">
+                        <p>Hover on map to see in detail data</p>
+                    </div>
+                </section>
+                <section id="vmap" class="box">
+                    <center>
+                        <div class='tableauPlaceholder' id='viz1737751909459' style='position: relative'>
+                            <noscript><a href='#'><img alt='Dashboard 1' src='https://public.tableau.com/static/images/NF/NFLMap_17377518504560/Dashboard1/1_rss.png' style='border: none' /></a></noscript>
+                            <object class='tableauViz' style='display:none;'>
+                                <param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' />
+                                <param name='embed_code_version' value='3' />
+                                <param name='site_root' value='' />
+                                <param name='name' value='NFLMap_17377518504560/Dashboard1' />
+                                <param name='tabs' value='no' />
+                                <param name='toolbar' value='yes' />
+                                <param name='static_image' value='https://public.tableau.com/static/images/NF/NFLMap_17377518504560/Dashboard1/1.png' />
+                                <param name='animate_transition' value='yes' />
+                                <param name='display_static_image' value='yes' />
+                                <param name='display_spinner' value='yes' />
+                                <param name='display_overlay' value='yes' />
+                                <param name='display_count' value='yes' />
+                                <param name='language' value='en-GB' />
+                            </object>
+                        </div>
+                        <script type='text/javascript'>
+                            var divElement = document.getElementById('viz1737751909459');
+                            var vizElement = divElement.getElementsByTagName('object')[0];
+                            if (divElement.offsetWidth > 800) {
+                                vizElement.style.width = '100%';
+                                vizElement.style.height = (divElement.offsetWidth * 0.75) + 'px';
+                            } else if (divElement.offsetWidth > 500) {
+                                vizElement.style.width = '100%';
+                                vizElement.style.height = (divElement.offsetWidth * 0.75) + 'px';
+                            } else {
+                                vizElement.style.width = '100%';
+                                vizElement.style.height = '827px';
+                            }
+                            var scriptElement = document.createElement('script');
+                            scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';
+                            vizElement.parentNode.insertBefore(scriptElement, vizElement);
+                        </script>
+                    </center>
+                </section><br>
+                <section id="green" class="box">
+                    <h4>Scroll right >></h4>
+                    <div class='tableauPlaceholder' id='viz1737751276528' style='position: relative'>
+                        <noscript><a href='#'><img alt='Dashboard 1' src='https://public.tableau.com/static/images/Gr/GreenGraph/Dashboard1/1_rss.png' style='border: none' /></a></noscript>
+                        <object class='tableauViz' style='display:none;'>
+                            <param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' />
+                            <param name='embed_code_version' value='3' />
+                            <param name='site_root' value='' />
+                            <param name='name' value='GreenGraph/Dashboard1' />
+                            <param name='tabs' value='no' />
+                            <param name='toolbar' value='yes' />
+                            <param name='static_image' value='https://public.tableau.com/static/images/Gr/GreenGraph/Dashboard1/1.png' />
+                            <param name='animate_transition' value='yes' />
+                            <param name='display_static_image' value='yes' />
+                            <param name='display_spinner' value='yes' />
+                            <param name='display_overlay' value='yes' />
+                            <param name='display_count' value='yes' />
+                            <param name='language' value='en-GB' />
+                        </object>
+                    </div>
+                    <script type='text/javascript'>
+                        var divElement = document.getElementById('viz1737751276528');
+                        var vizElement = divElement.getElementsByTagName('object')[0];
+                        if (divElement.offsetWidth > 800) {
+                            vizElement.style.width = '100%';
+                            vizElement.style.height = (divElement.offsetWidth * 0.75) + 'px';
+                        } else if (divElement.offsetWidth > 500) {
+                            vizElement.style.width = '100%';
+                            vizElement.style.height = (divElement.offsetWidth * 0.75) + 'px';
+                        } else {
+                            vizElement.style.width = '100%';
+                            vizElement.style.height = '727px';
+                        }
+                        var scriptElement = document.createElement('script');
+                        scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';
+                        vizElement.parentNode.insertBefore(scriptElement, vizElement);
+                    </script>
+                </section><br><br><br>
+                <section id="bar" class="box">
+                    <div class='tableauPlaceholder' id='viz1737743565938' style='position: relative'>
+                        <noscript><a href='#'><img alt='Dashboard 2' src='https://public.tableau.com/static/images/Ba/BarNFL/Dashboard2/1_rss.png' style='border: none' /></a></noscript>
+                        <object class='tableauViz' style='display:none;'>
+                            <param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' />
+                            <param name='embed_code_version' value='3' />
+                            <param name='site_root' value='' />
+                            <param name='name' value='BarNFL/Dashboard2' />
+                            <param name='tabs' value='no' />
+                            <param name='toolbar' value='yes' />
+                            <param name='static_image' value='https://public.tableau.com/static/images/Ba/BarNFL/Dashboard2/1.png' />
+                            <param name='animate_transition' value='yes' />
+                            <param name='display_static_image' value='yes' />
+                            <param name='display_spinner' value='yes' />
+                            <param name='display_overlay' value='yes' />
+                            <param name='display_count' value='yes' />
+                            <param name='language' value='en-GB' />
+                        </object>
+                    </div>
+                    <script type='text/javascript'>
+                        var divElement = document.getElementById('viz1737743565938');
+                        var vizElement = divElement.getElementsByTagName('object')[0];
+                        if (divElement.offsetWidth > 800) {
+                            vizElement.style.width = '100%';
+                            vizElement.style.height = (divElement.offsetWidth * 0.75) + 'px';
+                        } else if (divElement.offsetWidth > 500) {
+                            vizElement.style.width = '100%';
+                            vizElement.style.height = (divElement.offsetWidth * 0.75) + 'px';
+                        } else {
+                            vizElement.style.width = '100%';
+                            vizElement.style.height = '727px';
+                        }
+                        var scriptElement = document.createElement('script');
+                        scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';
+                        vizElement.parentNode.insertBefore(scriptElement, vizElement);
+                    </script>
+                </section>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Mock drone data
+        const mockDrone = {
+            speed: 5, // m/s
+            sprayRate: 1, // L/min
+            sprayWidth: 5, // m
+            baseStation: [28.592, 77.349], // lat, lng
+            refillTime: 30 // seconds
+        };
+
+        // Initialize map and layers
+        var map = L.map('map').setView([28.592376, 77.349851], 16);
+        L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Sprayed area layer
+        var sprayedLayer = L.geoJSON(null, {
+            style: { color: 'green', fillOpacity: 0.5 }
+        }).addTo(map);
+
+        // Base station marker
+        var baseStationMarker = L.circleMarker(mockDrone.baseStation, {
+            radius: 5,
+            color: 'blue',
+            fillOpacity: 1
+        }).addTo(map).bindPopup('Base Station');
+
+        // Drone marker
+        var droneMarker = L.circleMarker(mockDrone.baseStation, {
+            radius: 8,
+            color: 'red',
+            fillOpacity: 1
+        });
+
+        // Area tooltip function
+        function createAreaTooltip(layer) {
+            if (layer.areaTooltip) return;
+            layer.areaTooltip = L.tooltip({
+                permanent: true,
+                direction: 'center',
+                className: 'area-tooltip'
+            });
+            layer.on('remove', function(event) {
+                layer.areaTooltip.remove();
+            });
+            layer.on('add', function(event) {
+                updateAreaTooltip(layer);
+                layer.areaTooltip.addTo(map);
+            });
+            if (map.hasLayer(layer)) {
+                updateAreaTooltip(layer);
+                layer.areaTooltip.addTo(map);
+            }
+        }
+
+        function updateAreaTooltip(layer) {
+            var area = L.GeometryUtil.geodesicArea(layer.getLatLngs()[0]);
+            var readableArea = L.GeometryUtil.readableArea(area, true);
+            var latlng = layer.getCenter();
+            layer.areaTooltip.setContent(readableArea).setLatLng(latlng);
+            document.getElementById('area-display').textContent = readableArea;
+            updateFertilizerAndRefills(area);
+        }
+
+        function updateFertilizerAndRefills(area) {
+            var cropType = document.getElementById('crop-type');
+            var fertilizerRate = parseFloat(cropType.selectedOptions[0].getAttribute('data-fertilizer'));
+            var areaInHectares = area / 10000;
+            var fertilizerRequired = areaInHectares * fertilizerRate;
+            document.getElementById('fertilizer-required').textContent = fertilizerRequired.toFixed(2) + ' L';
+            var droneCapacity = parseInt(document.getElementById('drone-capacity').value);
+            var droneRefills = Math.ceil(fertilizerRequired / droneCapacity);
+            document.getElementById('drone-refills').textContent = droneRefills;
+            var flightTime = (droneRefills * 7) + (droneRefills * 3);
+            document.getElementById('flight-time').textContent = flightTime + ' min';
+            return { fertilizerRequired, droneCapacity };
+        }
+
+        // Generate zigzag path
+        function generateZigzagPath(polygon, sprayWidth) {
+            var coords = polygon.getLatLngs()[0].map(pt => [pt.lng, pt.lat]);
+            coords.push(coords[0]); // Close the polygon
+            var turfPolygon = turf.polygon([coords]);
+            var bbox = turf.bbox(turfPolygon);
+            var lines = [];
+            var step = sprayWidth / 111320; // Convert meters to degrees (approx)
+            for (var y = bbox[1]; y <= bbox[3]; y += step) {
+                var line = turf.lineString([[bbox[0], y], [bbox[2], y]]);
+                var clipped = turf.lineIntersect(line, turfPolygon);
+                if (clipped.features.length) {
+                    clipped.features.forEach(feat => {
+                        lines.push(feat.geometry.coordinates);
+                    });
+                }
+            }
+            // Sort lines to create zigzag
+            var path = [];
+            lines.forEach((line, i) => {
+                var pts = i % 2 === 0 ? line : line.reverse();
+                path.push(...pts);
+            });
+            return path.map(pt => [pt[1], pt[0]]); // Convert to [lat, lng]
+        }
+
+        // Animate drone
+        function animateDrone(path, polygonArea, fertilizerRequired, droneCapacity) {
+            if (!path.length) {
+                alert('No valid path generated.');
+                return;
+            }
+            droneMarker.addTo(map);
+            var tankLevel = droneCapacity;
+            var totalDistance = 0;
+            var sprayedCoords = [];
+            var i = 0;
+            var lastPos = path[0];
+            var alertList = document.getElementById('alert-list');
+
+            function updateStats() {
+                var covered = Math.min((totalDistance / (polygonArea / mockDrone.sprayWidth)) * 100, 100);
+                document.getElementById('area-covered').textContent = covered.toFixed(1) + '%';
+            }
+
+            function moveToBaseStation(callback) {
+                var start = droneMarker.getLatLng();
+                var end = L.latLng(mockDrone.baseStation);
+                var steps = 50;
+                var step = 0;
+                var interval = setInterval(() => {
+                    step++;
+                    var t = step / steps;
+                    var lat = start.lat + (end.lat - start.lat) * t;
+                    var lng = start.lng + (end.lng - start.lng) * t;
+                    droneMarker.setLatLng([lat, lng]);
+                    if (step >= steps) {
+                        clearInterval(interval);
+                        alertList.innerHTML += '<li>Refilling at base station...</li>';
+                        setTimeout(() => {
+                            tankLevel = droneCapacity;
+                            alertList.innerHTML += '<li>Refill complete. Resuming flight.</li>';
+                            callback();
+                        }, mockDrone.refillTime * 1000);
+                    }
+                }, 20);
+            }
+
+            var animation = setInterval(() => {
+                if (i >= path.length) {
+                    clearInterval(animation);
+                    droneMarker.remove();
+                    alertList.innerHTML += '<li>Fertilization complete!</li>';
+                    updateStats();
+                    return;
+                }
+
+                droneMarker.setLatLng(path[i]);
+                var distance = map.distance(lastPos, path[i]); // meters
+                totalDistance += distance;
+                var time = distance / mockDrone.speed; // seconds
+                var fertilizerUsed = (mockDrone.sprayRate * time) / 60; // liters
+                tankLevel -= fertilizerUsed;
+
+                sprayedCoords.push(path[i]);
+                if (sprayedCoords.length > 1) {
+                    sprayedLayer.addData({
+                        type: 'Feature',
+                        geometry: {
+                            type: 'LineString',
+                            coordinates: sprayedCoords.slice(-2).map(pt => [pt[1], pt[0]])
+                        }
+                    });
+                }
+
+                updateStats();
+
+                if (tankLevel <= 0 && i < path.length - 1) {
+                    clearInterval(animation);
+                    alertList.innerHTML += '<li>Tank empty. Returning to base station.</li>';
+                    moveToBaseStation(() => {
+                        animation = setInterval(arguments.callee, 100);
+                    });
+                }
+
+                lastPos = path[i];
+                i++;
+            }, 100);
+
+            // Stop simulation on button click
+            document.getElementById('end-flight-btn').onclick = () => {
+                clearInterval(animation);
+                droneMarker.remove();
+                sprayedLayer.clearLayers();
+                document.getElementById('area-covered').textContent = '0%';
+                alertList.innerHTML += '<li>Simulation stopped.</li>';
+            };
+        }
+
+        // Initialize polygon and draw control
+        var polygon = L.polygon([
+            [28.591708, 77.348892],
+            [28.592177, 77.348424],
+            [28.592856, 77.349386],
+            [28.592376, 77.349851]
+        ]).addTo(map);
+        createAreaTooltip(polygon);
+
+        var drawnItems = L.featureGroup().addTo(map);
+        map.addControl(new L.Control.Draw({
+            edit: {
+                featureGroup: drawnItems,
+                poly: {
+                    allowIntersection: false
+                }
+            },
+            draw: {
+                marker: false,
+                circle: false,
+                circlemarker: false,
+                rectangle: false,
+                polyline: false,
+                polygon: {
+                    allowIntersection: false,
+                    showArea: true
+                }
+            }
+        }));
+
+        map.on(L.Draw.Event.CREATED, function(event) {
+            var layer = event.layer;
+            if (layer instanceof L.Polygon) {
+                createAreaTooltip(layer);
+                drawnItems.clearLayers();
+                drawnItems.addLayer(layer);
+                polygon = layer;
+            }
+        });
+
+        map.on(L.Draw.Event.EDITED, function(event) {
+            event.layers.getLayers().forEach(function(layer) {
+                if (layer instanceof L.Polygon) {
+                    updateAreaTooltip(layer);
+                }
+            });
+        });
+
+        // Update calculations on dropdown changes
+        document.getElementById('crop-type').addEventListener('change', function() {
+            var area = L.GeometryUtil.geodesicArea(polygon.getLatLngs()[0]);
+            updateFertilizerAndRefills(area);
+        });
+
+        document.getElementById('drone-capacity').addEventListener('change', function() {
+            var area = L.GeometryUtil.geodesicArea(polygon.getLatLngs()[0]);
+            updateFertilizerAndRefills(area);
+        });
+
+        // Simulate flight button
+        document.getElementById('simulate-flight-btn').addEventListener('click', function() {
+            var area = L.GeometryUtil.geodesicArea(polygon.getLatLngs()[0]);
+            var { fertilizerRequired, droneCapacity } = updateFertilizerAndRefills(area);
+            sprayedLayer.clearLayers();
+            document.getElementById('area-covered').textContent = '0%';
+            var path = generateZigzagPath(polygon, mockDrone.sprayWidth);
+            animateDrone(path, area, fertilizerRequired, droneCapacity);
+            document.getElementById('alert-list').innerHTML += '<li>Starting simulation...</li>';
+        });
+
+        // Existing start/end flight buttons (unchanged functionality)
+        document.getElementById('start-flight-btn').addEventListener('click', function() {
+            document.getElementById('alert-list').innerHTML += '<li>Flight started (placeholder).</li>';
+        });
+
+        document.getElementById('end-flight-btn').addEventListener('click', function() {
+            document.getElementById('alert-list').innerHTML += '<li>Flight ended (placeholder).</li>';
+        });
+    </script>
+</body>
+</html>
