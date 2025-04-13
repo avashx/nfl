@@ -1,978 +1,352 @@
-
 <html>
-
 <head>
-	<title>NFL Project NSUT</title>
-   <meta charset="utf-8" />
+    <title>NFL Project NSUT</title>
+    <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico" />
-
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
         integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
         crossorigin="" />
     <link rel="stylesheet" href="https://unpkg.com/@bopen/leaflet-area-selection@0.6.1/dist/index.css" />
-
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css">
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
         integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
         crossorigin=""></script>
-
     <script src="https://unpkg.com/@bopen/leaflet-area-selection@0.6.1/dist/index.umd.js"></script>
-      <link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css">
-    <script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
-<style>
-@import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
-
-:root {
-	--c-gray-900: #000000;
-	--c-gray-800: #1f1f1f;
-	--c-gray-700: #2e2e2e;
-	--c-gray-600: #313131;
-	--c-gray-500: #27b9d5;
-	--c-gray-400: #a6a6a6;
-	--c-gray-300: #bdbbb7;
-	--c-gray-200: #f1f1f1;
-	--c-gray-100: #ffffff;
-
-	--c-green-500: #45ffbc;
-	--c-olive-500: #e3ffa8;
-
-	--c-white: var(--c-gray-100);
-
-	--c-text-primary: var(--c-gray-100);
-	--c-text-secondary: var(--c-gray-200);
-	--c-text-tertiary: var(--c-gray-500);
-}
-html {
-  scroll-behavior: smooth;
-}
-body {
-	line-height: 1.5;
-	min-height: 100vh;
-	font-family: "Be Vietnam Pro", sans-serif;
-	background-color: var(--c-gray-900);
-	color: var(--c-text-primary);
-	display: flex;
-	padding-top: 3vw;
-	padding-bottom: 3vw;
-	justify-content: center;
-
-
-background: linear-gradient(-45deg, #000000, #082e04, #76044e);
-background-size: 400% 400%;
- animation: gradient 15s ease infinite;
-	backdrop-filter:blur(4px);
-  z-index:-5;
-}
-		
-@keyframes gradient {
-	0% {
-		background-position: 0% 50%;
-	}
-	50% {
-		background-position: 100% 50%;
-	}
-	100% {
-		background-position: 0% 50%;
-	}
-}
-
-
-
-
-*,
-*:before,
-*:after {
-	box-sizing: border-box;
-}
-
-img {
-	display: block;
-	max-width: 100%;
-}
-
-button,
-select,
-input,
-textarea {
-	font: inherit;
-}
-
-a {
-	color: inherit;
-}
-
-.responsive-wrapper {
-	width: 90%;
-	max-width: 1600px;
-	margin-left: auto;
-	margin-right: auto;
-}
-
-.app {
-    height: max-content;
-    width: 95%;
-    max-width: 1600px;
-    background-color: #041702;
-    padding: 2vw 3vw 6vw;
-    display: flex;
-    flex-direction: column;
-background-color: rgba(4, 23, 2, 0.5);
-  box-shadow: 4px 4px 12px black;
-  backdrop-filter: blur(60px);
-}
-
-
-.app-header {
-	grid-template-columns: minmax(min-content, 175px) minmax(max-content, 1fr) minmax(
-			max-content,
-			400px
-		);
-	column-gap: 4rem;
-	align-items: flex-end;
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		border-bottom: 1px solid var(--c-gray-600);
-	
-}
-
-.app-header-navigation {
-	@media (min-width: 1200px) {
-	}
-}
-
-
-.app-header-actions {
-	display: flex;
-	align-items: center;
-	@media (min-width: 1200px) {
-	}
-}
-
-.app-header-actions-buttons {
-	display: flex;
-	border-left: 1px solid var(--c-gray-600);
-	margin-left: 2rem;
-	padding-left: 2rem;
-
-	& > * + * {
-		margin-left: 1rem;
-	}
-}
-
-
-
-
-.app-body {
-	height: 100%;
-
-	grid-template-columns: minmax(min-content, 175px) minmax(max-content, 1fr) minmax(
-			min-content,
-			0px
-		);
-
-	column-gap: 4rem;
-	padding-top: 2.5rem;
-
-	@media (max-width: 1200px) {
-		grid-template-columns: 1fr;
-		& > * {
-			margin-bottom: 3.5rem;
-		}
-	}
-}
-
-.app-body-navigation {
-	display: flex;
-	flex-direction: column;
-	justify-content: space-between;
-	@media (max-width: 1200px) {
-		display: none;
-	}
-}
-
-.app-body-sidebar {
-}
-
-.footer {
-	margin-top: auto;
-	h1 {
-		font-size: 1.5rem;
-		line-height: 1.125;
-		display: flex;
-		align-items: flex-start;
-		small {
-			font-size: 0.5em;
-			margin-left: 0.25em;
-		}
-	}
-
-	div {
-		border-top: 1px solid var(--c-gray-600);
-		margin-top: 1.5rem;
-		padding-top: 1rem;
-		font-size: 0.75rem;
-		color: var(--c-text-tertiary);
-	}
-}
-
-.logo {
-	display: flex;
-	align-items: center;
-	padding-bottom: 1rem;
-	padding-top: 1rem;
-	border-bottom: 1px solid var(--c-gray-600);
-	@media (max-width: 1200px) {
-		border-bottom: 0;
-	}
-}
-
-.logo-icon {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	width: 54px;
-	height: 54px;
-}
-
-.logo-title {
-	display: flex;
-	flex-direction: column;
-	line-height: 1.25;
-	margin-left: 0.75rem;
-	span:first-child {
-		color: var(--c-text-primary);
-	}
-	span:last-child {
-		color: #ca5656;
-	}
-}
-
-.navigation {
-	display: flex;
-	flex-direction: column;
-	align-items: flex-start;
-	color: var(--c-text-tertiary);
-	a {
-		display: flex;
-		align-items: center;
-		text-decoration: none;
-		transition: 0.25s ease;
-
-		* {
-			transition: 0.25s ease;
-		}
-
-		i {
-			margin-right: 0.75rem;
-			font-size: 1.25em;
-			flex-shrink: 0;
-		}
-
-		& + a {
-			margin-top: 1.25rem;
-		}
-
-		&:hover,
-		&:focus {
-			transform: translateX(4px);
-			color: var(--c-text-primary);
-		}
-	}
-}
-
-.tabs {
-	display: flex;
-	justify-content: space-between;
-	color: var(--c-text-tertiary);
-	border-bottom: 1px solid var(--c-gray-600);
-
-	a {
-		padding-top: 1rem;
-		padding-bottom: 1rem;
-		text-decoration: none;
-		border-top: 2px solid transparent;
-		display: inline-flex;
-		transition: 0.25s ease;
-		&.active,
-		&:hover,
-		&:focus {
-			color: var(--c-text-primary);
-			border-color: var(--c-text-primary);
-		}
-	}
-}
-
-.user-profile {
-	display: flex;
-	align-items: center;
-	border: 0;
-	background: transparent;
-	cursor: pointer;
-	color: var(--c-text-tertiary);
-	transition: 0.25s ease;
-
-	&:hover,
-	&:focus {
-		color: var(--c-text-primary);
-		span:last-child {
-			box-shadow: 0 0 0 4px var(--c-gray-800), 0 0 0 5px var(--c-text-tertiary);
-		}
-	}
-
-	span:first-child {
-		display: flex;
-		font-size: 1.125rem;
-		padding-top: 1rem;
-		padding-bottom: 1rem;
-		border-bottom: 1px solid var(--c-gray-600);
-		font-weight: 300;
-	}
-
-	span:last-child {
-		transition: 0.25s ease;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		width: 42px;
-		height: 42px;
-		border-radius: 50%;
-		overflow: hidden;
-		margin-left: 1.5rem;
-		flex-shrink: 0;
-	}
-}
-
-.icon-button {
-	border-radius: 50%;
-	border: 0;
-  	width: 72px;
-		height: 72px;
-margin:2%;
-	color: var(--c-text-primary);
-	cursor: pointer;
-	transition: 0.25s ease;
-	flex-shrink: 0;
-
-	i {
-		transition: 0.25s ease;
-	}
-
-	&:hover,
-	&:focus {
-     transform: scale(1.05);
-    transition: all 0.3s ease-in-out;
-    color:white;
-		box-shadow: 0 0 0 4px var(--c-gray-800), 0 0 0 5px var(--c-text-tertiary);
-	}
-}
-
-.tiles {
-	display: grid;
-	grid-template-columns: repeat(3, 1fr);
-	column-gap: 1rem;
-	row-gap: 1rem;
-	margin-top: 1.25rem;
-	@media (max-width: 700px) {
-		grid-template-columns: repeat(1, 1fr);
-	}
-}
-
-.tile {
-	padding: 1rem;
-	border-radius: 8px;
-	background-color: var(--c-olive-500);
-	color: var(--c-gray-900);
-	min-height: 200px;
-	display: flex;
-	flex-direction: column;
-	justify-content: space-between;
-	position: relative;
-	transition: 0.25s ease;
-
-	&:hover {
-		transform: translateY(-5px);
-	}
-
-	&:focus-within {
-		box-shadow: 0 0 0 2px var(--c-gray-800), 0 0 0 4px var(--c-olive-500);
-	}
-
-	&:nth-child(2) {
-		background-color: var(--c-green-500);
-		&:focus-within {
-			box-shadow: 0 0 0 2px var(--c-gray-800), 0 0 0 4px var(--c-green-500);
-		}
-	}
-	&:nth-child(3) {
-		background-color: var(--c-gray-300);
-		&:focus-within {
-			box-shadow: 0 0 0 2px var(--c-gray-800), 0 0 0 4px var(--c-gray-300);
-		}
-	}
-
-	a {
-		text-decoration: none;
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		font-weight: 600;
-
-
-
-		&:focus {
-			box-shadow: none;
-		}
-
-		&:after {
-			content: "";
-			display: block;
-			position: absolute;
-			top: 0;
-			left: 0;
-			right: 0;
-			bottom: 0;
-		}
-	}
-}
-
-.tile-header {
-	display: flex;
-	align-items: center;
-	i {
-		font-size: 2.5em;
-	}
-
-	h3 {
-		display: flex;
-		flex-direction: column;
-		line-height: 1.375;
-		margin-left: 0.5rem;
-		span:first-child {
-			font-weight: 600;
-		}
-
-		span:last-child {
-			font-size: 0.825em;
-			font-weight: 200;
-		}
-	}
-}
-
-.service-section {
-	& > h2 {
-		font-size: 1.5rem;
-		margin-bottom: 1.25rem;
-	}
-}
-
-.service-section-header {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	& > * + * {
-		margin-left: 1.25rem;
-	}
-
-	@media (max-width: 1000px) {
-		display: none;
-	}
-}
-
-.service-section-footer {
-	color: var(--c-text-tertiary);
-	margin-top: 1rem;
-}
-
-.service {
-	color: #969593;
-  text-align: right;
-  font-size: 0.7rem;
-}
-.service span {
-	color: white;
-  font-size: 0.8rem;
-}
-#toolbar-container{
-	display: none;
-	visibility: hidden;
-}
-
-.tableauPublicButton, .toolbar-item .collaborate {
-	visibility: hidden;
-	display: none;
-}
-
-.search-field {
-	display: flex;
-	flex-grow: 1;
-	position: relative;
-	input {
-		width: 100%;
-		padding-top: 0.5rem;
-		padding-bottom: 0.5rem;
-		border: 0;
-		border-bottom: 1px solid var(--c-gray-600);
-		background-color: transparent;
-		padding-left: 1.5rem;
-	}
-
-	i {
-		position: absolute;
-		left: 0;
-		top: 50%;
-		transform: translateY(-50%);
-	}
-}
-  
-  .val{		color: var(--c-text-tertiary);
-} 
-
-.dropdown-field {
-
-	flex-grow: 1;
-	position: relative;
-	select {
-		width: 100%;
-		padding-top: 0.5rem;
-		padding-bottom: 0.5rem;
-		border: 0;
-		border-bottom: 1px solid var(--c-gray-600);
-		background-color: transparent;
-		padding-right: 1.5rem;
-		appearance: none;
-		color: var(--c-text-tertiary);
-		width: 100%;
-	}
-
-	i {
-		position: absolute;
-		right: 0;
-		top: 50%;
-		transform: translateY(-50%);
-	}
-}
-  
-  .map{
-    overflow:none;
-max-width:90vw;
-  align-items: center;
-
-
-  }
-
-.flat-button {
-	border-radius: 6px;
-	background-color: var(--c-gray-700);
-	padding: 0.5em 1.5em;
-	border: 0;
-	color: var(--c-text-secondary);
-	transition: 0.25s ease;
-	cursor: pointer;
-	&:hover,
-	&:focus {
-		background-color: var(--c-gray-600);
-	}
-}
-
-.mobile-only {
-	display: none;
-	@media (max-width: 1000px) {
-		display: inline-flex;
-	}
-}
-
-.transfer-section {
-	margin-top: 2.5rem;
-}
-
-.transfer-section-header {
-	display: flex;
-	align-items: center;
-	width: 100%;
-	padding-bottom: 0.75rem;
-	border-bottom: 1px solid var(--c-gray-600);
-	h2 {
-		font-size: 1.5rem;
-	}
-}
-
-.payments {
-	display: flex;
-	flex-direction: column;
-	margin-top: 1.5rem;
-}
-
-.payment {
-	display: flex;
-	align-items: center;
-	& + * {
-		margin-top: 1rem;
-	}
-}
-
-.card {
-	width: 125px;
-	padding: 0.375rem;
-	aspect-ratio: 3 / 2;
-	flex-shrink: 0;
-	border-radius: 6px;
-	color: var(--c-gray-800);
-	display: flex;
-	flex-direction: column;
-	justify-content: space-between;
-	font-size: 0.75rem;
-	font-weight: 600;
-	&.green {
-		background-color: var(--c-green-500);
-	}
-
-	&.olive {
-		background-color: var(--c-olive-500);
-	}
-
-	&.gray {
-		background-color: var(--c-gray-300);
-	}
-
-	span:last-child {
-		align-self: flex-end;
-	}
-}
-
-.payment-details {
-	display: flex;
-	width: 100%;
-	flex-direction: column;
-	margin-left: 1.5rem;
-	h3 {
-		font-size: 1rem;
-		color: var(--c-text-tertiary);
-	}
-
-	div {
-		margin-top: 0.75rem;
-		padding-top: 0.75rem;
-		padding-bottom: 0.75rem;
-		border-top: 1px solid var(--c-gray-600);
-		border-bottom: 1px solid var(--c-gray-600);
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		flex: 1;
-
-		span {
-			font-size: 1.5rem;
-		}
-	}
-}
-
-.filter-options {
-	margin-left: 1.25rem;
-	padding-left: 1.25rem;
-	border-left: 1px solid var(--c-gray-600);
-	display: flex;
-	align-items: center;
-	flex: 1 1 auto;
-
-	p {
-		& + * {
-			margin-left: auto;
-			margin-right: 0.75rem;
-		}
-		color: var(--c-text-tertiary);
-		font-size: 0.875rem;
-		@media (max-width: 1000px) {
-			display: none;
-		}
-	}
-}
-
-.transfers {
-	display: flex;
-	flex-direction: column;
-	margin-top: 1.5rem;
-}
-
-.transfer {
-	display: flex;
-	align-items: center;
-	width: 100%;
-	font-size: 0.875rem;
-	@media (max-width: 1000px) {
-		align-items: flex-start;
-		flex-direction: column;
-	}
-	& + * {
-		margin-top: 2rem;
-	}
-}
- .box{
-  flex: 1;
-  min-width: 100%;
-  min-height: auto;
-  background-color: white;
-  align-items: center;
-  padding-bottom: 10px;
-  border: 1px solid #373F48;
-  border-radius: 12px;
-  text-align: center;
-  cursor: pointer;
-  overflow: scroll;
-  color: #393838;
-  display: inline-block;
-  transition: .3s linear;
-  box-shadow: 5px 7px #888888;
-}
-.transfer-logo {
-	background-color: var(--c-gray-200);
-	border-radius: 4px;
-	width: 42px;
-	height: 42px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	img {
-		width: 45%;
-	}
-}
-
-.transfer-details {
-	margin-left: 2rem;
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	flex: 1;
-	@media (max-width: 1000px) {
-		flex-wrap: wrap;
-		margin-left: 0;
-		margin-top: 1rem;
-	}
-	div {
-		width: calc(100% / 3 - 1rem);
-		@media (max-width: 1000px) {
-			width: 100%;
-		}
-		& + div {
-			margin-left: 1rem;
-			@media (max-width: 1000px) {
-				margin-left: 0;
-				margin-top: 1rem;
-			}
-		}
-	}
-
-	dd {
-		color: var(--c-text-tertiary);
-		margin-top: 2px;
-	}
-}
-
-.transfer-number {
-	margin-left: 2rem;
-	font-size: 1.125rem;
-	flex-shrink: 0;
-	width: 15%;
-	display: flex;
-	justify-content: flex-end;
-	@media (max-width: 1000px) {
-		margin-left: 0;
-		margin-top: 1.25rem;
-		width: 100%;
-		justify-content: flex-start;
-	}
-}
-
-.payment-section {
-	& > h2 {
-		font-size: 1.5rem;
-	}
-}
-
-.payment-section-header {
-	display: flex;
-	align-items: center;
-	margin-top: 1rem;
-	p {
-		color: var(--c-text-tertiary);
-		font-size: 0.875rem;
-	}
-
-	div {
-		padding-left: 1rem;
-		margin-left: auto;
-		display: flex;
-		align-items: center;
-		& > * + * {
-			margin-left: 0.5rem;
-		}
-	}
-}
-
-.card-button {
-	display: flex;
-	width: 50px;
-	height: 34px;
-	align-items: center;
-	justify-content: center;
-	overflow: hidden;
-	background-color: transparent;
-	transition: 0.25s ease;
-	border-radius: 4px;
-	border: 2px solid var(--c-gray-600);
-	color: var(--c-text-primary);
-	cursor: pointer;
-	&.mastercard svg {
-		max-height: 15px;
-	}
-
-	&:focus,
-	&:hover,
-	&.active {
-		color: var(--c-gray-800);
-		background-color: var(--c-white);
-		border-color: var(--c-white);
-	}
-}
-
-.faq {
-	margin-top: 1.5rem;
-	display: flex;
-	flex-direction: column;
-	p {
-		color: var(--c-text-tertiary);
-		font-size: 0.875rem;
-	}
-
-	div {
-		margin-top: 0.75rem;
-		padding-top: 0.75rem;
-		padding-bottom: 0.75rem;
-		border-top: 1px solid var(--c-gray-600);
-		border-bottom: 1px solid var(--c-gray-600);
-		font-size: 0.875rem;
-		display: flex;
-		align-items: center;
-
-		label {
-			padding-right: 1rem;
-			margin-right: 1rem;
-			border-right: 1px solid var(--c-gray-600);
-		}
-
-		input {
-			border: 0;
-			background-color: transparent;
-			padding: 0.25em 0;
-			width: 100%;
-		}
-	}
-}
-
-.payment-section-footer {
-	display: flex;
-	align-items: center;
-	margin-top: 1.5rem;
-}
-
-.save-button {
-	border: 1px solid currentColor;
-	color: var(--c-text-tertiary);
-	border-radius: 6px;
-	padding: 0.75em 2.5em;
-	background-color: transparent;
-	transition: 0.25s ease;
-	cursor: pointer;
-	&:focus,
-	&:hover {
-		color: var(--c-white);
-	}
-}
-
-.settings-button {
-	display: flex;
-	align-items: center;
-	color: var(--c-text-tertiary);
-	background-color: transparent;
-	border: 0;
-	padding: 0;
-	margin-left: 1.5rem;
-	cursor: pointer;
-	transition: 0.25s ease;
-	i {
-		margin-right: 0.5rem;
-	}
-	&:focus,
-	&:hover {
-		color: var(--c-white);
-	}
-}
-
-input,
-select,
-a,
-textarea,
-button {
-	&:focus {
-		outline: 0;
-		box-shadow: 0 0 0 2px var(--c-gray-800), 0 0 0 4px var(--c-gray-300);
-	}
-}
-    .leaflet-control-attribution {
-    display:none;
-}
-        
-._37qQG button{
-    background-image: url("https://cdn-icons-png.flaticon.com/512/7168/7168063.png");
-
-margin:2%;
-    font-size: 15px;
-    height: 40px ;
-    padding: 10px 15px;
-    border: none ;
-    border-radius:5px;
-   color: white;
-}
-
-
-._37qQG button:hover{
-  transform: scale(1.05);
-    transition: all 0.3s ease-in-out;
-    color:white;
-}
- ._37qQG button:active{
-  
-    background: #b97ebb;
-    color:white;
-} 
+    <script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+
+        :root {
+            --c-gray-900: #000000;
+            --c-gray-800: #1f1f1f;
+            --c-gray-700: #2e2e2e;
+            --c-gray-600: #313131;
+            --c-gray-500: #27b9d5;
+            --c-gray-400: #a6a6a6;
+            --c-gray-300: #bdbbb7;
+            --c-gray-200: #f1f1f1;
+            --c-gray-100: #ffffff;
+            --c-green-500: #45ffbc;
+            --c-olive-500: #e3ffa8;
+            --c-white: var(--c-gray-100);
+            --c-text-primary: var(--c-gray-100);
+            --c-text-secondary: var(--c-gray-200);
+            --c-text-tertiary: var(--c-gray-500);
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            line-height: 1.5;
+            min-height: 100vh;
+            font-family: "Be Vietnam Pro", sans-serif;
+            background-color: var(--c-gray-900);
+            color: var(--c-text-primary);
+            display: flex;
+            padding-top: 3vw;
+            padding-bottom: 3vw;
+            justify-content: center;
+            background: linear-gradient(-45deg, #000000, #082e04, #76044e);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            backdrop-filter: blur(4px);
+            z-index: -5;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        *, *:before, *:after {
+            box-sizing: border-box;
+        }
+
+        img {
+            display: block;
+            max-width: 100%;
+        }
+
+        button, select, input, textarea {
+            font: inherit;
+        }
+
+        a {
+            color: inherit;
+        }
+
+        .responsive-wrapper {
+            width: 90%;
+            max-width: 1600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .app {
+            height: max-content;
+            width: 95%;
+            max-width: 1600px;
+            background-color: #041702;
+            padding: 2vw 3vw 6vw;
+            display: flex;
+            flex-direction: column;
+            background-color: rgba(4, 23, 2, 0.5);
+            box-shadow: 4px 4px 12px black;
+            backdrop-filter: blur(60px);
+        }
+
+        .app-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--c-gray-600);
+        }
+
+        .app-header-actions {
+            display: flex;
+            align-items: center;
+        }
+
+        .app-header-actions-buttons {
+            display: flex;
+            border-left: 1px solid var(--c-gray-600);
+            margin-left: 2rem;
+            padding-left: 2rem;
+        }
+
+        .app-body {
+            height: 100%;
+            padding-top: 2.5rem;
+        }
+
+        .footer {
+            margin-top: auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            padding-bottom: 1rem;
+            padding-top: 1rem;
+            border-bottom: 1px solid var(--c-gray-600);
+        }
+
+        .logo-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 54px;
+            height: 54px;
+        }
+
+        .logo-title {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.25;
+            margin-left: 0.75rem;
+        }
+
+        .service {
+            color: #969593;
+            text-align: right;
+            font-size: 0.7rem;
+        }
+
+        .service span {
+            color: white;
+            font-size: 0.8rem;
+        }
+
+        .icon-button {
+            border-radius: 50%;
+            border: 0;
+            width: 72px;
+            height: 72px;
+            margin: 2%;
+            color: var(--c-text-primary);
+            cursor: pointer;
+            transition: 0.25s ease;
+        }
+
+        .icon-button:hover, .icon-button:focus {
+            transform: scale(1.05);
+            transition: all 0.3s ease-in-out;
+            color: white;
+            box-shadow: 0 0 0 4px var(--c-gray-800), 0 0 0 5px var(--c-text-tertiary);
+        }
+
+        .tiles {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            column-gap: 1rem;
+            row-gap: 1rem;
+            margin-top: 1.25rem;
+        }
+
+        .tile {
+            padding: 1rem;
+            border-radius: 8px;
+            background-color: var(--c-olive-500);
+            color: var(--c-gray-900);
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            transition: 0.25s ease;
+        }
+
+        .tile:hover {
+            transform: translateY(-5px);
+        }
+
+        .tile:nth-child(2) {
+            background-color: var(--c-green-500);
+        }
+
+        .tile:nth-child(3) {
+            background-color: var(--c-gray-300);
+        }
+
+        .service-section > h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .service-section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .service-section-footer {
+            color: var(--c-text-tertiary);
+            margin-top: 1rem;
+        }
+
+        .search-field {
+            display: flex;
+            flex-grow: 1;
+            position: relative;
+        }
+
+        .search-field input {
+            width: 100%;
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+            border: 0;
+            border-bottom: 1px solid var(--c-gray-600);
+            background-color: transparent;
+            padding-left: 1.5rem;
+        }
+
+        .dropdown-field {
+            flex-grow: 1;
+            position: relative;
+        }
+
+        .dropdown-field select {
+            width: 100%;
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+            border: 0;
+            border-bottom: 1px solid var(--c-gray-600);
+            background-color: transparent;
+            padding-right: 1.5rem;
+            appearance: none;
+            color: var(--c-text-tertiary);
+        }
+
+        .flat-button {
+            border-radius: 6px;
+            background-color: var(--c-gray-700);
+            padding: 0.5em 1.5em;
+            border: 0;
+            color: var(--c-text-secondary);
+            transition: 0.25s ease;
+            cursor: pointer;
+        }
+
+        .flat-button:hover, .flat-button:focus {
+            background-color: var(--c-gray-600);
+        }
+
+        .mobile-only {
+            display: none;
+        }
+
+        .box {
+            flex: 1;
+            min-width: 100%;
+            min-height: auto;
+            background-color: white;
+            align-items: center;
+            padding-bottom: 10px;
+            border: 1px solid #373F48;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            overflow: scroll;
+            color: #393838;
+            display: inline-block;
+            transition: .3s linear;
+            box-shadow: 5px 7px #888888;
+        }
+
+        .leaflet-control-attribution {
+            display: none;
+        }
+
+        ._37qQG button {
+            background-image: url("https://cdn-icons-png.flaticon.com/512/7168/7168063.png");
+            margin: 2%;
+            font-size: 15px;
+            height: 40px;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            color: white;
+        }
+
+        ._37qQG button:hover {
+            transform: scale(1.05);
+            transition: all 0.3s ease-in-out;
+            color: white;
+        }
+
+        ._37qQG button:active {
+            background: #b97ebb;
+            color: white;
+        }
+
         .main-container {
             display: flex;
             justify-content: space-between;
             padding: 20px;
         }
-        
+
         .map-container {
             width: 68%;
-              height: fit-content;
-
-  background-color: rgba(225,195,205,0.09);
+            height: fit-content;
+            background-color: rgba(225,195,205,0.09);
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            box-shadow:5px 7px 12px black;
-  backdrop-filter: blur(60px);
+            box-shadow: 5px 7px 12px black;
+            backdrop-filter: blur(60px);
         }
-        
+
         #map {
             width: 100%;
             height: 600px;
             background-color: #eaeaea;
             border-radius: 8px;
         }
-        
+
         .data-container {
             width: 30%;
             display: flex;
@@ -980,309 +354,544 @@ margin:2%;
             gap: 20px;
         }
 
-	.api {
-			display:block;
-  			color:red;
-  		}			
-  .warn {display:none;}
+        .api {
+            display: block;
+            color: red;
+        }
 
-@media only screen and (max-width: 800px) {
+        .warn {
+            display: none;
+        }
 
-  .data-container{display:none;}
-  .warn {display:block;
-  color:red;
-  }
-   .map-container {
-     width: 100%;}
-  .app-header-actions, .app-header-actions-buttons  {display:none;  }
+        @media only screen and (max-width: 800px) {
+            .data-container { display: none; }
+            .warn { display: block; color: red; }
+            .map-container { width: 100%; }
+            .app-header-actions, .app-header-actions-buttons { display: none; }
+        }
 
-  }
-        
         .chart, .data-table, .alerts, .control-panel {
-  background-color: rgba(225,195,205,0.09);
+            background-color: rgba(225,195,205,0.09);
             padding: 20px;
-
             border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            box-shadow:5px 7px 12px black;
-  backdrop-filter: blur(60px);  
-  
-  }
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 5px 7px 12px black;
+            backdrop-filter: blur(60px);
+        }
 
-  .data-table{          overflow:auto;}
-        
+        .data-table {
+            overflow: auto;
+        }
 
-        
         table {
             width: 100%;
             border-collapse: collapse;
         }
-        
+
         table th, table td {
             padding: 8px;
             text-align: left;
             border-bottom: 1px solid #ddd;
         }
-        
-        table th {
+
+        .control-panel {
+            text-align: center;
         }
-        
-   
-        
-        .control-panel 
-button{
-   margin:2%;
-    font-size: 15px;
-    height: 40px ;
-    padding: 0px 30px;
-    border: none ;
-    border-radius:5px;
-   background: #157efb;
-   color: white;
-}
 
+        .control-panel button {
+            margin: 2%;
+            font-size: 15px;
+            height: 40px;
+            padding: 0px 30px;
+            border: none;
+            border-radius: 5px;
+            color: white;
+        }
 
-button:hover{
-    background: #f5f5f5;
-    color:#157efb;
-}
- button:active{
-  
-    background: #b97ebb;
-    color:white;
-} 
-        
-</style>
-    
+        #simulate-flight-btn {
+            display: block;
+            margin: 10px auto;
+            font-size: 16px;
+            height: 45px;
+            padding: 0 40px;
+            background: #fffcf3;
+            border: 2px solid #ffffff;
+            color: #000000;
+        }
+
+        #simulate-flight-btn:hover {
+            background: #000000;
+            color: #ffffff;
+        }
+
+        #fast-forward-btn {
+            background: #455a64;
+            color: white;
+        }
+
+        #fast-forward-btn:hover {
+            background: #607d8b;
+            color: white;
+        }
+
+        #fast-forward-btn:active {
+            background: #37474f;
+            color: white;
+        }
+
+        #fast-refill-btn {
+            background: #4a7043;
+            color: white;
+        }
+
+        #fast-refill-btn:hover {
+            background: #689f38;
+            color: white;
+        }
+
+        #fast-refill-btn:active {
+            background: #3b5e2b;
+            color: white;
+        }
+
+        .drone-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        #start-flight-btn {
+            background: #004d40;
+            color: white;
+        }
+
+        #start-flight-btn:hover {
+            background: #00695c;
+            color: white;
+        }
+
+        #start-flight-btn:active {
+            background: #00332b;
+            color: white;
+        }
+
+        #end-flight-btn {
+            background: #37474f;
+            color: white;
+        }
+
+        #end-flight-btn:hover {
+            background: #546e7a;
+            color: white;
+        }
+
+        #end-flight-btn:active {
+            background: #263238;
+            color: white;
+        }
+
+        #fast-refill-btn.blink {
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0% { background: #ff0000; color: #ffffff; }
+            50% { background: #ffffff; color: #ff0000; }
+            100% { background: #ff0000; color: #ffffff; }
+        }
+
+        /* Alerts console style */
+        .alerts {
+            background: #1a1a1a;
+            color: #d3d3d3;
+            font-family: "Courier New", Courier, monospace;
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        #alert-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #alert-list li {
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* Drone animation */
+        .drone-icon {
+            width: 32px;
+            height: 32px;
+        }
+
+        .header-drone-icon {
+            width: 32px;
+            height: 32px;
+            display: inline-block;
+            vertical-align: middle;
+            margin-left: 10px;
+            transform-origin: center;
+        }
+
+        .header-drone-icon.rotating {
+            animation: rotate 2s linear infinite;
+        }
+
+        .map-header {
+            display: flex;
+            align-items: center;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
 </head>
-
 <body>
-	<div class="app">
-		<header class="app-header">
-			<div class="app-header-logo">
-				<div class="logo">
-					<span class="logo-icon">
-						<img src="https://upload.wikimedia.org/wikipedia/en/thumb/9/9e/National_Fertilizers_Logo.svg/800px-National_Fertilizers_Logo.svg.png" />
-					</span>
-					<h1 class="logo-title">
-						<span>NFL</span>
-						<span>Dashboard</span>
-					</h1>
-				</div>
-			</div>
-			<div class="app-header-actions">
-<div class="service">
-<p>  <span>WINTER PROJECT</span><br>NETAJI SUBHAS UNIVERSITY OF TECHNOLOGY
-</p>
-					</div>
-				<div class="app-header-actions-buttons">
-
-						<i class="ph-magnifying-glass"></i>
-					</button>
-					<div class="icon-button">
-						<i class="ph-bell"><img src="https://upload.wikimedia.org/wikipedia/en/thumb/e/e9/Netaji_Subhas_University_of_Technology.svg/300px-Netaji_Subhas_University_of_Technology.svg.png" ></i>
-					</div>
-				</div>
-			</div>
-
-	
-		</header>
-		<div class="app-body">
-		
-			<div class="app-body-main-content">
-        <center>	<p class="warn">Please use big screen to view content properly</p></center>
-
-            <div class="main-container">
-        <div class="map-container">
-            <h2>Live Map</h2>
-            <div id="map"></div><br> <center>	<p class="api">As API is no longer connected most of the function will not work!</p></center>
-        </div>
-
-        <div class="data-container">
-            <div class="chart">
-                <h2>Fertilizer Application</h2><br>    <p>Area: <span class="val" id="area-display">0 m²</span></p>
-   <div class="dropdown-field"><label for="crop-type">Select Crop Type:</label>
-        <select id="crop-type">
-            <option value="rice" data-fertilizer="25">Rice (25 L/ha)</option>
-            <option value="wheat" data-fertilizer="20">Wheat (20 L/ha)</option>
-            <option value="millets" data-fertilizer="15">Millets (15 L/ha)</option>
-            <option value="pulses" data-fertilizer="10">Pulses (10 L/ha)</option>
-            <option value="tea" data-fertilizer="30">Tea (30 L/ha)</option>
-            <option value="coffee" data-fertilizer="35">Coffee (35 L/ha)</option>
-            <option value="sugarcane" data-fertilizer="40">Sugarcane (40 L/ha)</option>
-            <option value="oilseeds" data-fertilizer="18">Oil Seeds (18 L/ha)</option>
-            <option value="cotton" data-fertilizer="25">Cotton (25 L/ha)</option>
-            <option value="jute" data-fertilizer="20">Jute (20 L/ha)</option>
-     </select></div>
-        <br>
-      <div class="dropdown-field">  <label for="drone-capacity">Select Drone Tank Capacity:</label>
-        <select id="drone-capacity">
-            <option value="12">12 L</option>
-            <option value="20" selected>20 L</option>
-            <option value="45">45 L</option>
-            <option value="60">60 L</option>
-            <option value="84">84 L</option>
-              </select></div>
-        <p>Fertilizer Required: <span class="val" id="fertilizer-required">0 L</span></p>
-        <p>Drone Refills Needed: <span class="val" id="drone-refills">0</span></p>
-        <p>Est. Drone Flight Time: <span class="val" id="flight-time">0 minutes</span></p>
-               
+    <div class="app">
+        <header class="app-header">
+            <div class="app-header-logo">
+                <div class="logo">
+                    <span class="logo-icon">
+                        <img src="https://upload.wikimedia.org/wikipedia/en/thumb/9/9e/National_Fertilizers_Logo.svg/800px-National_Fertilizers_Logo.svg.png" />
+                    </span>
+                    <h1 class="logo-title">
+                        <span>NFL</span>
+                        <span>Dashboard</span>
+                    </h1>
+                </div>
             </div>
-
-            <div class="data-table">
-                <h2>Flight Data Logs</h2>
-                <table id="flight-log">
-                    <thead>
-                        <tr>
-                            <th>Flight ID</th>
-                            <th>Time</th>
-                            <th>Location</th>
-                            <th>Fertilizer Applied (kg)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        
-                    </tbody>
-                </table>
+            <div class="app-header-actions">
+                <div class="service">
+                    <p><span>WINTER PROJECT</span><br>NETAJI SUBHAS UNIVERSITY OF TECHNOLOGY</p>
+                </div>
+                <div class="app-header-actions-buttons">
+                    <div class="icon-button">
+                        <i class="ph-bell"><img src="https://upload.wikimedia.org/wikipedia/en/thumb/e/e9/Netaji_Subhas_University_of_Technology.svg/300px-Netaji_Subhas_University_of_Technology.svg.png"></i>
+                    </div>
+                </div>
             </div>
-
-            <div class="alerts">
-                <h2>Alerts</h2>
-                <ul id="alert-list">
-                    <li>All systems normal.</li>
-                </ul>
+        </header>
+        <div class="app-body">
+            <div class="app-body-main-content">
+                <center><p class="warn">Please use big screen to view content properly</p></center>
+                <div class="main-container">
+                    <div class="map-container">
+                        <div class="map-header">
+                            <h2>Live Map</h2>
+                            <div class="header-drone-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-linecap="round" stroke-linejoin="round" width="32" height="32" stroke-width="2"><path d="M10 10h4v4h-4z"></path><path d="M10 10l-3.5 -3.5"></path><path d="M9.96 6a3.5 3.5 0 1 0 -3.96 3.96"></path><path d="M14 10l3.5 -3.5"></path><path d="M18 9.96a3.5 3.5 0 1 0 -3.96 -3.96"></path><path d="M14 14l3.5 3.5"></path><path d="M14.04 18a3.5 3.5 0 1 0 3.96 -3.96"></path><path d="M10 14l-3.5 3.5"></path><path d="M6 14.04a3.5 3.5 0 1 0 3.96 3.96"></path></svg>
+                            </div>
+                        </div>
+                        <div id="map"></div><br>
+                        <center><p class="api">As API is no longer connected most of the function will not work!</p></center>
+                    </div>
+                    <div class="data-container">
+                        <div class="control-panel">
+                            <button id="simulate-flight-btn">Simulate Flight</button>
+                            <button id="fast-forward-btn">Fast Forward</button>
+                            <button id="fast-refill-btn">Fast Refill</button>
+                            <div class="drone-controls">
+                                <button id="start-flight-btn">Start Flight</button>
+                                <button id="end-flight-btn">End Flight</button>
+                            </div>
+                        </div>
+                        <div class="alerts">
+                            <h2>Alerts</h2>
+                            <ul id="alert-list">
+                                <li>All systems normal.</li>
+                            </ul>
+                        </div>
+                        <div class="data-table">
+                            <h2>Flight Data Logs</h2>
+                            <table id="flight-log">
+                                <thead>
+                                    <tr>
+                                        <th>Flight ID</th>
+                                        <th>Time</th>
+                                        <th>Location</th>
+                                        <th>Fertilizer Applied (kg)</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                        <div class="chart">
+                            <h2>Fertilizer Application</h2><br>
+                            <p>Area: <span class="val" id="area-display">0 m²</span></p>
+                            <p>Area Covered: <span class="val" id="area-covered">0%</span></p>
+                            <div class="dropdown-field">
+                                <label for="crop-type">Select Crop Type:</label>
+                                <select id="crop-type">
+                                    <option value="rice" data-fertilizer="25">Rice (25 L/ha)</option>
+                                    <option value="wheat" data-fertilizer="20">Wheat (20 L/ha)</option>
+                                    <option value="millets" data-fertilizer="15">Millets (15 L/ha)</option>
+                                    <option value="pulses" data-fertilizer="10">Pulses (10 L/ha)</option>
+                                    <option value="tea" data-fertilizer="30">Tea (30 L/ha)</option>
+                                    <option value="coffee" data-fertilizer="35">Coffee (35 L/ha)</option>
+                                    <option value="sugarcane" data-fertilizer="40">Sugarcane (40 L/ha)</option>
+                                    <option value="oilseeds" data-fertilizer="18">Oil Seeds (18 L/ha)</option>
+                                    <option value="cotton" data-fertilizer="25">Cotton (25 L/ha)</option>
+                                    <option value="jute" data-fertilizer="20">Jute (20 L/ha)</option>
+                                </select>
+                            </div>
+                            <br>
+                            <div class="dropdown-field">
+                                <label for="drone-capacity">Select Drone Tank Capacity:</label>
+                                <select id="drone-capacity">
+                                    <option value="12">12 L</option>
+                                    <option value="20" selected>20 L</option>
+                                    <option value="45">45 L</option>
+                                    <option value="60">60 L</option>
+                                    <option value="84">84 L</option>
+                                </select>
+                            </div>
+                            <p>Fertilizer Required: <span class="val" id="fertilizer-required">0 L</span></p>
+                            <p>Drone Refills Needed: <span class="val" id="drone-refills">0</span></p>
+                            <p>Est. Spray Time: <span class="val" id="spray-time">0 min 0 sec</span></p>
+                        </div>
+                    </div>
+                </div>
+                <section class="service-section">
+                    <h2>Data & Records</h2>
+                    <div class="service-section-header">
+                        <div class="search-field">
+                            <i class="ph-magnifying-glass"></i>
+                            <input type="text" placeholder="District">
+                        </div>
+                        <div class="dropdown-field">
+                            <select>
+                                <option>State wise</option>
+                                <option>India</option>
+                            </select>
+                            <i class="ph-caret-down"></i>
+                        </div>
+                        <button class="flat-button">Search</button>
+                    </div>
+                    <div class="mobile-only">
+                        <button class="flat-button">Map</button>
+                    </div>
+                    <div class="tiles">
+                        <article class="tile">
+                            <div class="tile-header">
+                                <i class="ph-lightning-light"></i>
+                                <h3><span>Fertilizers</span><span>Consuption</span></h3>
+                            </div>
+                            <a href="#green">
+                                <span>District wise</span>
+                                <span class="icon-button"><i class="ph-caret-right-bold"></i></span>
+                            </a>
+                        </article>
+                        <article class="tile">
+                            <div class="tile-header">
+                                <i class="ph-fire-simple-light"></i>
+                                <h3><span>Urea</span><span>Consuption</span></h3>
+                            </div>
+                            <a href="#vmap">
+                                <span>District wise</span>
+                                <span class="icon-button"><i class="ph-caret-right-bold"></i></span>
+                            </a>
+                        </article>
+                        <article class="tile">
+                            <div class="tile-header">
+                                <i class="ph-file-light"></i>
+                                <h3><span>Crop</span><span>production</span></h3>
+                            </div>
+                            <a href="#bar">
+                                <span>District wise</span>
+                                <span class="icon-button"><i class="ph-caret-right-bold"></i></span>
+                            </a>
+                        </article>
+                    </div>
+                    <div class="service-section-footer">
+                        <p>Hover on map to see in detail data</p>
+                    </div>
+                </section>
+                <section id="vmap" class="box">
+                    <center>
+                        <div class='tableauPlaceholder' id='viz1737751909459' style='position: relative'>
+                            <noscript><a href='#'><img alt='Dashboard 1' src='https://public.tableau.com/static/images/NF/NFLMap_17377518504560/Dashboard1/1_rss.png' style='border: none' /></a></noscript>
+                            <object class='tableauViz' style='display:none;'>
+                                <param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' />
+                                <param name='embed_code_version' value='3' />
+                                <param name='site_root' value='' />
+                                <param name='name' value='NFLMap_17377518504560/Dashboard1' />
+                                <param name='tabs' value='no' />
+                                <param name='toolbar' value='yes' />
+                                <param name='static_image' value='https://public.tableau.com/static/images/NF/NFLMap_17377518504560/Dashboard1/1.png' />
+                                <param name='animate_transition' value='yes' />
+                                <param name='display_static_image' value='yes' />
+                                <param name='display_spinner' value='yes' />
+                                <param name='display_overlay' value='yes' />
+                                <param name='display_count' value='yes' />
+                                <param name='language' value='en-GB' />
+                            </object>
+                        </div>
+                        <script type='text/javascript'>
+                            var divElement = document.getElementById('viz1737751909459');
+                            var vizElement = divElement.getElementsByTagName('object')[0];
+                            if (divElement.offsetWidth > 800) {
+                                vizElement.style.width = '100%';
+                                vizElement.style.height = (divElement.offsetWidth * 0.75) + 'px';
+                            } else if (divElement.offsetWidth > 500) {
+                                vizElement.style.width = '100%';
+                                vizElement.style.height = (divElement.offsetWidth * 0.75) + 'px';
+                            } else {
+                                vizElement.style.width = '100%';
+                                vizElement.style.height = '827px';
+                            }
+                            var scriptElement = document.createElement('script');
+                            scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';
+                            vizElement.parentNode.insertBefore(scriptElement, vizElement);
+                        </script>
+                    </center>
+                </section><br>
+                <section id="green" class="box">
+                    <h4>Scroll right >></h4>
+                    <div class='tableauPlaceholder' id='viz1737751276528' style='position: relative'>
+                        <noscript><a href='#'><img alt='Dashboard 1' src='https://public.tableau.com/static/images/Gr/GreenGraph/Dashboard1/1_rss.png' style='border: none' /></a></noscript>
+                        <object class='tableauViz' style='display:none;'>
+                            <param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' />
+                            <param name='embed_code_version' value='3' />
+                            <param name='site_root' value='' />
+                            <param name='name' value='GreenGraph/Dashboard1' />
+                            <param name='tabs' value='no' />
+                            <param name='toolbar' value='yes' />
+                            <param name='static_image' value='https://public.tableau.com/static/images/Gr/GreenGraph/Dashboard1/1.png' />
+                            <param name='animate_transition' value='yes' />
+                            <param name='display_static_image' value='yes' />
+                            <param name='display_spinner' value='yes' />
+                            <param name='display_overlay' value='yes' />
+                            <param name='display_count' value='yes' />
+                            <param name='language' value='en-GB' />
+                        </object>
+                    </div>
+                    <script type='text/javascript'>
+                        var divElement = document.getElementById('viz1737751276528');
+                        var vizElement = divElement.getElementsByTagName('object')[0];
+                        if (divElement.offsetWidth > 800) {
+                            vizElement.style.width = '100%';
+                            vizElement.style.height = (divElement.offsetWidth * 0.75) + 'px';
+                        } else if (divElement.offsetWidth > 500) {
+                            vizElement.style.width = '100%';
+                            vizElement.style.height = (divElement.offsetWidth * 0.75) + 'px';
+                        } else {
+                            vizElement.style.width = '100%';
+                            vizElement.style.height = '727px';
+                        }
+                        var scriptElement = document.createElement('script');
+                        scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';
+                        vizElement.parentNode.insertBefore(scriptElement, vizElement);
+                    </script>
+                </section><br><br><br>
+                <section id="bar" class="box">
+                    <div class='tableauPlaceholder' id='viz1737743565938' style='position: relative'>
+                        <noscript><a href='#'><img alt='Dashboard 2' src='https://public.tableau.com/static/images/Ba/BarNFL/Dashboard2/1_rss.png' style='border: none' /></a></noscript>
+                        <object class='tableauViz' style='display:none;'>
+                            <param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' />
+                            <param name='embed_code_version' value='3' />
+                            <param name='site_root' value='' />
+                            <param name='name' value='BarNFL/Dashboard2' />
+                            <param name='tabs' value='no' />
+                            <param name='toolbar' value='yes' />
+                            <param name='static_image' value='https://public.tableau.com/static/images/Ba/BarNFL/Dashboard2/1.png' />
+                            <param name='animate_transition' value='yes' />
+                            <param name='display_static_image' value='yes' />
+                            <param name='display_spinner' value='yes' />
+                            <param name='display_overlay' value='yes' />
+                            <param name='display_count' value='yes' />
+                            <param name='language' value='en-GB' />
+                        </object>
+                    </div>
+                    <script type='text/javascript'>
+                        var divElement = document.getElementById('viz1737743565938');
+                        var vizElement = divElement.getElementsByTagName('object')[0];
+                        if (divElement.offsetWidth > 800) {
+                            vizElement.style.width = '100%';
+                            vizElement.style.height = (divElement.offsetWidth * 0.75) + 'px';
+                        } else if (divElement.offsetWidth > 500) {
+                            vizElement.style.width = '100%';
+                            vizElement.style.height = (divElement.offsetWidth * 0.75) + 'px';
+                        } else {
+                            vizElement.style.width = '100%';
+                            vizElement.style.height = '727px';
+                        }
+                        var scriptElement = document.createElement('script');
+                        scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';
+                        vizElement.parentNode.insertBefore(scriptElement, vizElement);
+                    </script>
+                </section>
             </div>
-
-            <div class="control-panel">
-               <center> <button id="start-flight-btn">Start Flight</button>
-                <button id="end-flight-btn">End Flight</button>
-              </center>  </div>
         </div>
     </div>
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-				<section class="service-section">
-					<h2>Data & Records</h2>
-					<div class="service-section-header">
-						<div class="search-field">
-							<i class="ph-magnifying-glass"></i>
-							<input type="text" placeholder="District">
-						</div>
-						<div class="dropdown-field">
-							<select>
-								<option>State wise</option>
-								<option>India</option>
-							</select>
-							<i class="ph-caret-down"></i>
-						</div>
-						<button class="flat-button">
-							Search
-						</button>
-					</div>
-					<div class="mobile-only">
-						<button class="flat-button">
-							 Map
-						</button>
-					</div>
-					<div class="tiles">
-						<article class="tile">
-							<div class="tile-header">
-								<i class="ph-lightning-light"></i>
-								<h3>
-									<span>Fertilizers </span>
-									<span>Consuption</span>
-								</h3>
-							</div>
-							<a href="#green">
-								<span>District wise</span>
-								<span class="icon-button">
-									<i class="ph-caret-right-bold"></i>
-								</span>
-							</a>
-						</article>
-						<article class="tile">
-							<div class="tile-header">
-								<i class="ph-fire-simple-light"></i>
-								<h3>
-									<span>Urea</span>
-									<span>Consuption</span>
-								</h3>
-							</div>
-							<a href="#vmap">
-								<span>District wise</span>
-								<span class="icon-button">
-									<i class="ph-caret-right-bold"></i>
-								</span>
-							</a>
-						</article>
-						<article class="tile">
-							<div class="tile-header">
-								<i class="ph-file-light"></i>
-								<h3>
-									<span>Crop</span>
-									<span>production</span>
-								</h3>
-							</div>
-							<a href="#bar">
-								<span>District wise</span>
-								<span class="icon-button">
-									<i class="ph-caret-right-bold"></i>
-								</span>
-							</a>
-						</article>
-					</div>
-					<div class="service-section-footer">
-						<p>Hover on map to see in detail data</p>
-					</div>
-				</section>				<section id="vmap" class="box" >
+    <script>
+        // Mock drone data
+        const mockDrone = {
+            speed: 2, // m/s (low speed)
+            sprayRate: 1, // L/min
+            sprayWidth: 5, // m
+            refillTime: 30 // seconds
+        };
 
-				         <center>   
-							<div class='tableauPlaceholder' id='viz1737751909459' style='position: relative'><noscript><a href='#'><img alt='Dashboard 1 ' src='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;NF&#47;NFLMap_17377518504560&#47;Dashboard1&#47;1_rss.png' style='border: none' /></a></noscript><object class='tableauViz'  style='display:none;'><param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' /> <param name='embed_code_version' value='3' /> <param name='site_root' value='' /><param name='name' value='NFLMap_17377518504560&#47;Dashboard1' /><param name='tabs' value='no' /><param name='toolbar' value='yes' /><param name='static_image' value='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;NF&#47;NFLMap_17377518504560&#47;Dashboard1&#47;1.png' /> <param name='animate_transition' value='yes' /><param name='display_static_image' value='yes' /><param name='display_spinner' value='yes' /><param name='display_overlay' value='yes' /><param name='display_count' value='yes' /><param name='language' value='en-GB' /></object></div>                <script type='text/javascript'>                    var divElement = document.getElementById('viz1737751909459');                    var vizElement = divElement.getElementsByTagName('object')[0];                    if ( divElement.offsetWidth > 800 ) { vizElement.style.width='100%';vizElement.style.height=(divElement.offsetWidth*0.75)+'px';} else if ( divElement.offsetWidth > 500 ) { vizElement.style.width='100%';vizElement.style.height=(divElement.offsetWidth*0.75)+'px';} else { vizElement.style.width='100%';vizElement.style.height='827px';}                     var scriptElement = document.createElement('script');                    scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';                    vizElement.parentNode.insertBefore(scriptElement, vizElement);                </script>
-       </center></section><br>
-	   
-	 
-	 
-	   <br><section id="green" class="box">
-       <h4>Scroll right >></h4><div class='tableauPlaceholder' id='viz1737751276528' style='position: relative'><noscript><a href='#'><img alt='Dashboard 1 ' src='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;Gr&#47;GreenGraph&#47;Dashboard1&#47;1_rss.png' style='border: none' /></a></noscript><object class='tableauViz'  style='display:none;'><param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' /> <param name='embed_code_version' value='3' /> <param name='site_root' value='' /><param name='name' value='GreenGraph&#47;Dashboard1' /><param name='tabs' value='no' /><param name='toolbar' value='yes' /><param name='static_image' value='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;Gr&#47;GreenGraph&#47;Dashboard1&#47;1.png' /> <param name='animate_transition' value='yes' /><param name='display_static_image' value='yes' /><param name='display_spinner' value='yes' /><param name='display_overlay' value='yes' /><param name='display_count' value='yes' /><param name='language' value='en-GB' /></object></div>                <script type='text/javascript'>                    var divElement = document.getElementById('viz1737751276528');                    var vizElement = divElement.getElementsByTagName('object')[0];                    if ( divElement.offsetWidth > 800 ) { vizElement.style.width='100%';vizElement.style.height=(divElement.offsetWidth*0.75)+'px';} else if ( divElement.offsetWidth > 500 ) { vizElement.style.width='100%';vizElement.style.height=(divElement.offsetWidth*0.75)+'px';} else { vizElement.style.width='100%';vizElement.style.height='727px';}                     var scriptElement = document.createElement('script');                    scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';                    vizElement.parentNode.insertBefore(scriptElement, vizElement);                </script>
-        
-        
-        
-     </section>
-       
-                   <br><br><br>  <section id="bar" class="box"><div class='tableauPlaceholder' id='viz1737743565938' style='position: relative'><noscript><a href='#'><img alt='Dashboard 2 ' src='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;Ba&#47;BarNFL&#47;Dashboard2&#47;1_rss.png' style='border: none' /></a></noscript><object class='tableauViz'  style='display:none;'><param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' /> <param name='embed_code_version' value='3' /> <param name='site_root' value='' /><param name='name' value='BarNFL&#47;Dashboard2' /><param name='tabs' value='no' /><param name='toolbar' value='yes' /><param name='static_image' value='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;Ba&#47;BarNFL&#47;Dashboard2&#47;1.png' /> <param name='animate_transition' value='yes' /><param name='display_static_image' value='yes' /><param name='display_spinner' value='yes' /><param name='display_overlay' value='yes' /><param name='display_count' value='yes' /><param name='language' value='en-GB' /></object></div>                <script type='text/javascript'>                    var divElement = document.getElementById('viz1737743565938');                    var vizElement = divElement.getElementsByTagName('object')[0];                    if ( divElement.offsetWidth > 800 ) { vizElement.style.width='100%';vizElement.style.height=(divElement.offsetWidth*0.75)+'px';} else if ( divElement.offsetWidth > 500 ) { vizElement.style.width='100%';vizElement.style.height=(divElement.offsetWidth*0.75)+'px';} else { vizElement.style.width='100%';vizElement.style.height='727px';}                     var scriptElement = document.createElement('script');                    scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';                    vizElement.parentNode.insertBefore(scriptElement, vizElement);                </script> 
-                   
-                   
-                   
- <script>
+        // Initialize map and layers
+        var map = L.map('map').setView([28.592376, 77.349851], 16);
+        L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Sprayed area layer
+        var sprayedLayer = L.geoJSON(null, {
+            style: { color: '#00FF00', fillOpacity: 0.5 }
+        }).addTo(map);
+
+        // Base station marker (initially unset)
+        var baseStationMarker = L.circleMarker([28.592376, 77.349851], {
+            radius: 5,
+            color: 'blue',
+            fillOpacity: 1
+        }).addTo(map).bindPopup('Base Station');
+
+        // Drone marker with provided SVG (static on map)
+        var droneIcon = L.divIcon({
+            className: 'drone-icon',
+            html: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="red" stroke-linecap="round" stroke-linejoin="round" width="32" height="32" stroke-width="2"><path d="M10 10h4v4h-4z"></path><path d="M10 10l-3.5 -3.5"></path><path d="M9.96 6a3.5 3.5 0 1 0 -3.96 3.96"></path><path d="M14 10l3.5 -3.5"></path><path d="M18 9.96a3.5 3.5 0 1 0 -3.96 -3.96"></path><path d="M14 14l3.5 3.5"></path><path d="M14.04 18a3.5 3.5 0 1 0 3.96 -3.96"></path><path d="M10 14l-3.5 3.5"></path><path d="M6 14.04a3.5 3.5 0 1 0 3.96 3.96"></path></svg>',
+            iconSize: [32, 32],
+            iconAnchor: [16, 16]
+        });
+
+        // Initialize drone marker at polygon vertex
+        var droneMarker = L.marker([28.591708, 77.348892], { icon: droneIcon });
+
+        // Update base station position
+        function updateBaseStation(polygon) {
+            var center = polygon.getCenter();
+            // Offset 50 meters north (1 degree ≈ 111320 meters)
+            var baseStation = [center.lat + (50 / 111320), center.lng];
+            mockDrone.baseStation = baseStation;
+            baseStationMarker.setLatLng(baseStation);
+        }
+
+        // Area tooltip function
         function createAreaTooltip(layer) {
-            if(layer.areaTooltip) {
-                return;
-            }
-
+            if (layer.areaTooltip) return;
             layer.areaTooltip = L.tooltip({
                 permanent: true,
                 direction: 'center',
                 className: 'area-tooltip'
             });
-
             layer.on('remove', function(event) {
                 layer.areaTooltip.remove();
             });
-
             layer.on('add', function(event) {
                 updateAreaTooltip(layer);
                 layer.areaTooltip.addTo(map);
             });
-
-            if(map.hasLayer(layer)) {
+            if (map.hasLayer(layer)) {
                 updateAreaTooltip(layer);
                 layer.areaTooltip.addTo(map);
             }
@@ -1292,58 +901,266 @@ button:hover{
             var area = L.GeometryUtil.geodesicArea(layer.getLatLngs()[0]);
             var readableArea = L.GeometryUtil.readableArea(area, true);
             var latlng = layer.getCenter();
-
-            layer.areaTooltip
-                .setContent(readableArea)
-                .setLatLng(latlng);
-
-            // Update the area in the <p> element
+            layer.areaTooltip.setContent(readableArea).setLatLng(latlng);
             document.getElementById('area-display').textContent = readableArea;
-                      // Calculate and update fertilizer and drone refills
-            updateFertilizerAndRefills(area);
- }
-  function updateFertilizerAndRefills(area) {
+            updateFertilizerAndTime(area);
+        }
+
+        function updateFertilizerAndTime(area) {
             var cropType = document.getElementById('crop-type');
             var fertilizerRate = parseFloat(cropType.selectedOptions[0].getAttribute('data-fertilizer'));
-
-            // Convert area to hectares (1 ha = 10,000 m²)
             var areaInHectares = area / 10000;
-
-            // Calculate fertilizer required
             var fertilizerRequired = areaInHectares * fertilizerRate;
             document.getElementById('fertilizer-required').textContent = fertilizerRequired.toFixed(2) + ' L';
-
-            // Get drone capacity from dropdown
             var droneCapacity = parseInt(document.getElementById('drone-capacity').value);
-
-            // Calculate drone refills
             var droneRefills = Math.ceil(fertilizerRequired / droneCapacity);
             document.getElementById('drone-refills').textContent = droneRefills;
 
-            // Estimate drone flight time dynamically (7 minutes per refill + 3 minutes setup time per refill)
-            var flightTime = (droneRefills * 7) + (droneRefills * 3);
-            document.getElementById('flight-time').textContent = flightTime + ' min';
+            // Calculate spray time: area / (sprayWidth * speed) + refill time
+            var sprayTime = area / (mockDrone.sprayWidth * mockDrone.speed); // seconds
+            sprayTime += droneRefills * mockDrone.refillTime; // Add refill time
+            var minutes = Math.floor(sprayTime / 60);
+            var seconds = Math.round(sprayTime % 60);
+            document.getElementById('spray-time').textContent = `${minutes} min ${seconds} sec`;
+
+            return { fertilizerRequired, droneCapacity, sprayTime };
         }
-        var map = L.map('map').setView([28.592376, 77.349851], 16);
 
-        L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(map);
+        // Generate zigzag path
+        function generateZigzagPath(polygon, sprayWidth) {
+            var coords = polygon.getLatLngs()[0].map(pt => [pt.lng, pt.lat]);
+            coords.push(coords[0]);
+            var turfPolygon = turf.polygon([coords]);
+            var bbox = turf.bbox(turfPolygon);
+            var lines = [];
+            var step = sprayWidth / 111320; // Meters to degrees
+            for (var y = bbox[1]; y <= bbox[3]; y += step) {
+                var line = turf.lineString([[bbox[0], y], [bbox[2], y]]);
+                var clipped = turf.lineIntersect(line, turfPolygon);
+                if (clipped.features.length >= 2) {
+                    var points = clipped.features.map(f => f.geometry.coordinates);
+                    points.sort((a, b) => a[0] - b[0]);
+                    lines.push(points);
+                }
+            }
+            var path = [];
+            lines.forEach((line, i) => {
+                var pts = i % 2 === 0 ? line : line.reverse();
+                path.push(...pts);
+            });
+            return path.map(pt => [pt[1], pt[0]]);
+        }
 
+        // Animate drone
+        function animateDrone(path, polygonArea, fertilizerRequired, droneCapacity) {
+            if (!path.length) {
+                alert('No valid path generated.');
+                return;
+            }
+            var headerDroneIcon = document.querySelector('.header-drone-icon');
+            headerDroneIcon.classList.add('rotating');
+            droneMarker.setLatLng(path[0]).addTo(map);
+            var tankLevel = droneCapacity;
+            var totalDistance = 0;
+            var sprayedCoords = [];
+            var i = 0;
+            var lastPos = path[0];
+            var alertList = document.getElementById('alert-list');
+            var speedMultiplier = 1; // 1x = normal, 2x, 4x
+            var lastDirection = '';
+            var isRefilling = false;
+            var lastPathIndex = 0;
+            var lastPathPoint = path[0];
+            var fastForwardBtn = document.getElementById('fast-forward-btn');
+            var fastRefillBtn = document.getElementById('fast-refill-btn');
+
+            function updateStats() {
+                var covered = Math.min((totalDistance / (polygonArea / mockDrone.sprayWidth)) * 100, 100);
+                document.getElementById('area-covered').textContent = covered.toFixed(1) + '%';
+            }
+
+            function getDirection(current, next) {
+                if (!next) return lastDirection;
+                return current[1] < next[1] ? 'West to East' : 'East to West';
+            }
+
+            function instantRefill() {
+                tankLevel = droneCapacity;
+                isRefilling = false;
+                fastRefillBtn.classList.remove('blink');
+                fastRefillBtn.style.background = '#4a7043';
+                fastRefillBtn.style.color = 'white';
+                alertList.insertAdjacentHTML('afterbegin', `<li>Tank refilled instantly (Speed: ${mockDrone.speed} m/s).</li>`);
+                returnToField();
+            }
+
+            function moveToBaseStation(callback) {
+                var start = droneMarker.getLatLng();
+                var end = L.latLng(mockDrone.baseStation);
+                var steps = 50;
+                var step = 0;
+                isRefilling = true;
+                fastRefillBtn.classList.add('blink');
+                var interval = setInterval(() => {
+                    step++;
+                    var t = step / steps;
+                    var lat = start.lat + (end.lat - start.lat) * t;
+                    var lng = start.lng + (end.lng - start.lng) * t;
+                    droneMarker.setLatLng([lat, lng]);
+                    if (step >= steps) {
+                        clearInterval(interval);
+                        alertList.insertAdjacentHTML('afterbegin', `<li>Refilling at base station (Speed: ${mockDrone.speed} m/s).</li>`);
+                        setTimeout(() => {
+                            tankLevel = droneCapacity;
+                            isRefilling = false;
+                            fastRefillBtn.classList.remove('blink');
+                            fastRefillBtn.style.background = '#4a7043';
+                            fastRefillBtn.style.color = 'white';
+                            alertList.insertAdjacentHTML('afterbegin', `<li>Refill complete.</li>`);
+                            callback();
+                        }, mockDrone.refillTime * 1000 / speedMultiplier);
+                    }
+                }, 20 / speedMultiplier); // 1s travel
+            }
+
+            function returnToField() {
+                var start = droneMarker.getLatLng();
+                var end = L.latLng(lastPathPoint);
+                var steps = 50;
+                var step = 0;
+                var interval = setInterval(() => {
+                    step++;
+                    var t = step / steps;
+                    var lat = start.lat + (end.lat - start.lat) * t;
+                    var lng = start.lng + (end.lng - start.lng) * t;
+                    droneMarker.setLatLng([lat, lng]);
+                    if (step >= steps) {
+                        clearInterval(interval);
+                        alertList.insertAdjacentHTML('afterbegin', `<li>Returning to field.</li>`);
+                        isRefilling = false;
+                        i = lastPathIndex;
+                        runAnimation();
+                    }
+                }, 20 / speedMultiplier); // 1s return
+            }
+
+            function runAnimation() {
+                var animation = setInterval(() => {
+                    if (i >= path.length) {
+                        clearInterval(animation);
+                        droneMarker.remove();
+                        headerDroneIcon.classList.remove('rotating');
+                        fastForwardBtn.textContent = 'Fast Forward';
+                        alertList.insertAdjacentHTML('afterbegin', `<li>Fertilization complete!</li>`);
+                        updateStats();
+                        return;
+                    }
+
+                    droneMarker.setLatLng(path[i]);
+                    var distance = map.distance(lastPos, path[i]);
+                    totalDistance += distance;
+                    var time = distance / mockDrone.speed;
+                    var fertilizerUsed = (mockDrone.sprayRate * time) / 60;
+                    tankLevel -= fertilizerUsed;
+
+                    var direction = getDirection(path[i], path[i + 1]);
+                    if (direction !== lastDirection && direction) {
+                        alertList.insertAdjacentHTML('afterbegin', `<li>Drone moving ${direction} (Speed: ${mockDrone.speed} m/s).</li>`);
+                        lastDirection = direction;
+                    }
+
+                    sprayedCoords.push(path[i]);
+                    if (sprayedCoords.length > 1) {
+                        sprayedLayer.addData({
+                            type: 'Feature',
+                            geometry: {
+                                type: 'LineString',
+                                coordinates: sprayedCoords.slice(-2).map(pt => [pt[1], pt[0]])
+                            }
+                        });
+                    }
+
+                    updateStats();
+
+                    if (tankLevel <= 0 && i < path.length - 1 && !isRefilling) {
+                        clearInterval(animation);
+                        lastPathIndex = i;
+                        lastPathPoint = path[i];
+                        alertList.insertAdjacentHTML('afterbegin', `<li>Moving to base station for refill (Speed: ${mockDrone.speed} m/s).</li>`);
+                        isRefilling = true;
+                        headerDroneIcon.classList.add('rotating');
+                        moveToBaseStation(() => {
+                            returnToField();
+                        });
+                        return;
+                    }
+
+                    lastPos = path[i];
+                    i++;
+                }, 100 / speedMultiplier); // Slower default speed
+
+                // Fast forward toggle
+                document.getElementById('fast-forward-btn').onclick = () => {
+                    if (speedMultiplier === 1) {
+                        speedMultiplier = 2;
+                    } else if (speedMultiplier === 2) {
+                        speedMultiplier = 4;
+                    } else {
+                        speedMultiplier = 1;
+                    }
+                    fastForwardBtn.textContent = `Fast Forward (${speedMultiplier}x)`;
+                    alertList.insertAdjacentHTML('afterbegin', `<li>Simulation speed: ${speedMultiplier}x.</li>`);
+                    clearInterval(animation);
+                    runAnimation();
+                };
+
+                // Fast refill
+                document.getElementById('fast-refill-btn').onclick = () => {
+                    if (isRefilling || tankLevel <= 0) {
+                        clearInterval(animation);
+                        lastPathIndex = i;
+                        lastPathPoint = path[i];
+                        droneMarker.setLatLng(mockDrone.baseStation);
+                        headerDroneIcon.classList.add('rotating');
+                        instantRefill();
+                    }
+                };
+
+                // Stop simulation
+                document.getElementById('end-flight-btn').onclick = () => {
+                    clearInterval(animation);
+                    droneMarker.remove();
+                    sprayedLayer.clearLayers();
+                    headerDroneIcon.classList.remove('rotating');
+                    fastForwardBtn.textContent = 'Fast Forward';
+                    document.getElementById('area-covered').textContent = '0%';
+                    alertList.insertAdjacentHTML('afterbegin', `<li>Simulation stopped.</li>`);
+                    if (isRefilling) {
+                        isRefilling = false;
+                        fastRefillBtn.classList.remove('blink');
+                        fastRefillBtn.style.background = '#4a7043';
+                        fastRefillBtn.style.color = 'white';
+                    }
+                };
+            }
+
+            runAnimation();
+        }
+
+        // Initialize polygon and draw control
         var polygon = L.polygon([
             [28.591708, 77.348892],
             [28.592177, 77.348424],
             [28.592856, 77.349386],
-            [28.592376, 77.349851],
+            [28.592376, 77.349851]
         ]).addTo(map);
-
         createAreaTooltip(polygon);
+        updateBaseStation(polygon);
 
-        /**
-         * EXAMPLE WITH LEAFLET DRAW CONTROL
-         */
+        // Move drone to initial polygon vertex
+        droneMarker.setLatLng([28.591708, 77.348892]);
+
         var drawnItems = L.featureGroup().addTo(map);
-
         map.addControl(new L.Control.Draw({
             edit: {
                 featureGroup: drawnItems,
@@ -1366,40 +1183,64 @@ button:hover{
 
         map.on(L.Draw.Event.CREATED, function(event) {
             var layer = event.layer;
-
-            if(layer instanceof L.Polygon) {
+            if (layer instanceof L.Polygon) {
                 createAreaTooltip(layer);
+                drawnItems.clearLayers();
+                sprayedLayer.clearLayers();
+                document.getElementById('area-covered').textContent = '0%';
+                drawnItems.addLayer(layer);
+                polygon = layer;
+                var firstVertex = layer.getLatLngs()[0][0];
+                droneMarker.setLatLng(firstVertex);
+                updateBaseStation(layer);
+                document.getElementById('alert-list').innerHTML = `<li>New field selected. Ready to fertilize.</li>`;
             }
-
-            drawnItems.addLayer(layer);
         });
 
         map.on(L.Draw.Event.EDITED, function(event) {
             event.layers.getLayers().forEach(function(layer) {
-                if(layer instanceof L.Polygon) {
+                if (layer instanceof L.Polygon) {
                     updateAreaTooltip(layer);
+                    sprayedLayer.clearLayers();
+                    document.getElementById('area-covered').textContent = '0%';
+                    var firstVertex = layer.getLatLngs()[0][0];
+                    droneMarker.setLatLng(firstVertex);
+                    updateBaseStation(layer);
                 }
             });
         });
- // Update calculations when crop type or drone capacity changes
+
+        // Update calculations on dropdown changes
         document.getElementById('crop-type').addEventListener('change', function() {
             var area = L.GeometryUtil.geodesicArea(polygon.getLatLngs()[0]);
-            updateFertilizerAndRefills(area);
+            updateFertilizerAndTime(area);
         });
 
         document.getElementById('drone-capacity').addEventListener('change', function() {
             var area = L.GeometryUtil.geodesicArea(polygon.getLatLngs()[0]);
-            updateFertilizerAndRefills(area);
+            updateFertilizerAndTime(area);
+        });
+
+        // Simulate flight button
+        document.getElementById('simulate-flight-btn').addEventListener('click', function() {
+            var area = L.GeometryUtil.geodesicArea(polygon.getLatLngs()[0]);
+            var { fertilizerRequired, droneCapacity } = updateFertilizerAndTime(area);
+            sprayedLayer.clearLayers();
+            document.getElementById('area-covered').textContent = '0%';
+            document.getElementById('alert-list').innerHTML = `<li>Starting simulation (Speed: ${mockDrone.speed} m/s).</li>`;
+            updateBaseStation(polygon);
+            var path = generateZigzagPath(polygon, mockDrone.sprayWidth);
+            animateDrone(path, area, fertilizerRequired, droneCapacity);
+        });
+
+        // Placeholder start/end flight buttons
+        document.getElementById('start-flight-btn').addEventListener('click', function() {
+            document.getElementById('alert-list').insertAdjacentHTML('afterbegin', `<li>Flight started (placeholder).</li>`);
+        });
+
+        document.getElementById('end-flight-btn').addEventListener('click', function() {
+            document.getElementById('alert-list').insertAdjacentHTML('afterbegin', `<li>Flight ended (placeholder).</li>`);
         });
     </script>
-    </section>
-                   
-     </center> 
-			</div>
-			
-		</div>
-    
- 
-	</div></body>
-
+</body>
 </html>
