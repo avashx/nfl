@@ -14,7 +14,6 @@
         crossorigin=""></script>
     <script src="https://unpkg.com/@bopen/leaflet-area-selection@0.6.1/dist/index.umd.js"></script>
     <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
-    <!-- Add Turf.js for path generation -->
     <script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
     <style>
         @import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
@@ -396,6 +395,10 @@
             border-bottom: 1px solid #ddd;
         }
 
+        .control-panel {
+            text-align: center;
+        }
+
         .control-panel button {
             margin: 2%;
             font-size: 15px;
@@ -415,6 +418,18 @@
         button:active {
             background: #b97ebb;
             color: white;
+        }
+
+        /* Drone animation */
+        .drone-icon {
+            width: 32px;
+            height: 32px;
+            animation: fly 1s ease-in-out infinite;
+        }
+
+        @keyframes fly {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(10deg); }
         }
     </style>
 </head>
@@ -451,6 +466,12 @@
                         <h2>Live Map</h2>
                         <div id="map"></div><br>
                         <center><p class="api">As API is no longer connected most of the function will not work!</p></center>
+                    </div>
+                    <div class="control-panel">
+                        <button id="simulate-flight-btn">Simulate Flight</button>
+                        <button id="fast-forward-btn">Fast Forward</button>
+                        <button id="start-flight-btn">Start Flight</button>
+                        <button id="end-flight-btn">End Flight</button>
                     </div>
                     <div class="data-container">
                         <div class="chart">
@@ -506,13 +527,6 @@
                             <ul id="alert-list">
                                 <li>All systems normal.</li>
                             </ul>
-                        </div>
-                        <div class="control-panel">
-                            <center>
-                                <button id="simulate-flight-btn">Simulate Flight</button>
-                                <button id="start-flight-btn">Start Flight</button>
-                                <button id="end-flight-btn">End Flight</button>
-                            </center>
                         </div>
                     </div>
                 </div>
@@ -599,7 +613,7 @@
                                 vizElement.style.height = (divElement.offsetWidth * 0.75) + 'px';
                             } else if (divElement.offsetWidth > 500) {
                                 vizElement.style.width = '100%';
-                                vizElement.style.height = (divElement.offsetWidth * 0.75) + 'px';
+                                vzElement.style.height = (divElement.offsetWidth * 0.75) + 'px';
                             } else {
                                 vizElement.style.width = '100%';
                                 vizElement.style.height = '827px';
@@ -701,12 +715,12 @@
         // Initialize map and layers
         var map = L.map('map').setView([28.592376, 77.349851], 16);
         L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            attribution: '© <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
 
         // Sprayed area layer
         var sprayedLayer = L.geoJSON(null, {
-            style: { color: 'green', fillOpacity: 0.5 }
+            style: { color: '#00FF00', fillOpacity: 0.5 }
         }).addTo(map);
 
         // Base station marker
@@ -716,12 +730,15 @@
             fillOpacity: 1
         }).addTo(map).bindPopup('Base Station');
 
-        // Drone marker
-        var droneMarker = L.circleMarker(mockDrone.baseStation, {
-            radius: 8,
-            color: 'red',
-            fillOpacity: 1
+        // Drone marker with SVG icon
+        var droneIcon = L.divIcon({
+            className: 'drone-icon',
+            html: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32" height="32"><path fill="red" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 14v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1h-6v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>',
+            iconSize: [32, 32],
+            iconAnchor: [16, 16]
         });
+
+        var droneMarker = L.marker(mockDrone.baseStation, { icon: droneIcon });
 
         // Area tooltip function
         function createAreaTooltip(layer) {
@@ -770,27 +787,26 @@
         // Generate zigzag path
         function generateZigzagPath(polygon, sprayWidth) {
             var coords = polygon.getLatLngs()[0].map(pt => [pt.lng, pt.lat]);
-            coords.push(coords[0]); // Close the polygon
+            coords.push(coords[0]);
             var turfPolygon = turf.polygon([coords]);
             var bbox = turf.bbox(turfPolygon);
             var lines = [];
-            var step = sprayWidth / 111320; // Convert meters to degrees (approx)
+            var step = sprayWidth / 111320; // Meters to degrees
             for (var y = bbox[1]; y <= bbox[3]; y += step) {
                 var line = turf.lineString([[bbox[0], y], [bbox[2], y]]);
                 var clipped = turf.lineIntersect(line, turfPolygon);
-                if (clipped.features.length) {
-                    clipped.features.forEach(feat => {
-                        lines.push(feat.geometry.coordinates);
-                    });
+                if (clipped.features.length >= 2) {
+                    var points = clipped.features.map(f => f.geometry.coordinates);
+                    points.sort((a, b) => a[0] - b[0]);
+                    lines.push(points);
                 }
             }
-            // Sort lines to create zigzag
             var path = [];
             lines.forEach((line, i) => {
                 var pts = i % 2 === 0 ? line : line.reverse();
                 path.push(...pts);
             });
-            return path.map(pt => [pt[1], pt[0]]); // Convert to [lat, lng]
+            return path.map(pt => [pt[1], pt[0]]);
         }
 
         // Animate drone
@@ -799,17 +815,24 @@
                 alert('No valid path generated.');
                 return;
             }
-            droneMarker.addTo(map);
+            droneMarker.setLatLng(path[0]).addTo(map);
             var tankLevel = droneCapacity;
             var totalDistance = 0;
             var sprayedCoords = [];
             var i = 0;
             var lastPos = path[0];
             var alertList = document.getElementById('alert-list');
+            var speedMultiplier = 1; // 1x = normal, 5x = fast
+            var lastDirection = '';
 
             function updateStats() {
                 var covered = Math.min((totalDistance / (polygonArea / mockDrone.sprayWidth)) * 100, 100);
                 document.getElementById('area-covered').textContent = covered.toFixed(1) + '%';
+            }
+
+            function getDirection(current, next) {
+                if (!next) return lastDirection;
+                return current[1] < next[1] ? 'Left to Right' : 'Right to Left';
             }
 
             function moveToBaseStation(callback) {
@@ -825,65 +848,84 @@
                     droneMarker.setLatLng([lat, lng]);
                     if (step >= steps) {
                         clearInterval(interval);
-                        alertList.innerHTML += '<li>Refilling at base station...</li>';
+                        alertList.innerHTML += `<li>Refilling at base station (Speed: ${mockDrone.speed} m/s).</li>`;
                         setTimeout(() => {
                             tankLevel = droneCapacity;
-                            alertList.innerHTML += '<li>Refill complete. Resuming flight.</li>';
+                            alertList.innerHTML += `<li>Refill complete. Resuming flight.</li>`;
                             callback();
-                        }, mockDrone.refillTime * 1000);
+                        }, mockDrone.refillTime * 1000 / speedMultiplier);
                     }
-                }, 20);
+                }, 20 / speedMultiplier);
             }
 
-            var animation = setInterval(() => {
-                if (i >= path.length) {
+            function runAnimation() {
+                var animation = setInterval(() => {
+                    if (i >= path.length) {
+                        clearInterval(animation);
+                        droneMarker.remove();
+                        alertList.innerHTML += `<li>Fertilization complete!</li>`;
+                        updateStats();
+                        return;
+                    }
+
+                    droneMarker.setLatLng(path[i]);
+                    var distance = map.distance(lastPos, path[i]);
+                    totalDistance += distance;
+                    var time = distance / mockDrone.speed;
+                    var fertilizerUsed = (mockDrone.sprayRate * time) / 60;
+                    tankLevel -= fertilizerUsed;
+
+                    var direction = getDirection(path[i], path[i + 1]);
+                    if (direction !== lastDirection && direction) {
+                        alertList.innerHTML += `<li>Drone moving ${direction} (Speed: ${mockDrone.speed} m/s).</li>`;
+                        lastDirection = direction;
+                    }
+
+                    sprayedCoords.push(path[i]);
+                    if (sprayedCoords.length > 1) {
+                        sprayedLayer.addData({
+                            type: 'Feature',
+                            geometry: {
+                                type: 'LineString',
+                                coordinates: sprayedCoords.slice(-2).map(pt => [pt[1], pt[0]])
+                            }
+                        });
+                    }
+
+                    updateStats();
+
+                    if (tankLevel <= 0 && i < path.length - 1) {
+                        clearInterval(animation);
+                        alertList.innerHTML += `<li>Tank empty. Returning to base station (Speed: ${mockDrone.speed} m/s).</li>`;
+                        moveToBaseStation(() => {
+                            runAnimation();
+                        });
+                        return;
+                    }
+
+                    lastPos = path[i];
+                    i++;
+                }, 50 / speedMultiplier);
+
+                // Fast forward toggle
+                document.getElementById('fast-forward-btn').onclick = () => {
+                    speedMultiplier = speedMultiplier === 1 ? 5 : 1;
+                    alertList.innerHTML += `<li>Simulation speed: ${speedMultiplier}x.</li>`;
+                    clearInterval(animation);
+                    runAnimation();
+                };
+
+                // Stop simulation
+                document.getElementById('end-flight-btn').onclick = () => {
                     clearInterval(animation);
                     droneMarker.remove();
-                    alertList.innerHTML += '<li>Fertilization complete!</li>';
-                    updateStats();
-                    return;
-                }
+                    sprayedLayer.clearLayers();
+                    document.getElementById('area-covered').textContent = '0%';
+                    alertList.innerHTML += `<li>Simulation stopped.</li>`;
+                };
+            }
 
-                droneMarker.setLatLng(path[i]);
-                var distance = map.distance(lastPos, path[i]); // meters
-                totalDistance += distance;
-                var time = distance / mockDrone.speed; // seconds
-                var fertilizerUsed = (mockDrone.sprayRate * time) / 60; // liters
-                tankLevel -= fertilizerUsed;
-
-                sprayedCoords.push(path[i]);
-                if (sprayedCoords.length > 1) {
-                    sprayedLayer.addData({
-                        type: 'Feature',
-                        geometry: {
-                            type: 'LineString',
-                            coordinates: sprayedCoords.slice(-2).map(pt => [pt[1], pt[0]])
-                        }
-                    });
-                }
-
-                updateStats();
-
-                if (tankLevel <= 0 && i < path.length - 1) {
-                    clearInterval(animation);
-                    alertList.innerHTML += '<li>Tank empty. Returning to base station.</li>';
-                    moveToBaseStation(() => {
-                        animation = setInterval(arguments.callee, 100);
-                    });
-                }
-
-                lastPos = path[i];
-                i++;
-            }, 100);
-
-            // Stop simulation on button click
-            document.getElementById('end-flight-btn').onclick = () => {
-                clearInterval(animation);
-                droneMarker.remove();
-                sprayedLayer.clearLayers();
-                document.getElementById('area-covered').textContent = '0%';
-                alertList.innerHTML += '<li>Simulation stopped.</li>';
-            };
+            runAnimation();
         }
 
         // Initialize polygon and draw control
@@ -921,8 +963,12 @@
             if (layer instanceof L.Polygon) {
                 createAreaTooltip(layer);
                 drawnItems.clearLayers();
+                sprayedLayer.clearLayers();
+                document.getElementById('area-covered').textContent = '0%';
                 drawnItems.addLayer(layer);
                 polygon = layer;
+                droneMarker.setLatLng(layer.getLatLngs()[0][0]);
+                document.getElementById('alert-list').innerHTML += `<li>New field selected. Ready to fertilize.</li>`;
             }
         });
 
@@ -930,6 +976,8 @@
             event.layers.getLayers().forEach(function(layer) {
                 if (layer instanceof L.Polygon) {
                     updateAreaTooltip(layer);
+                    sprayedLayer.clearLayers();
+                    document.getElementById('area-covered').textContent = '0%';
                 }
             });
         });
@@ -953,16 +1001,16 @@
             document.getElementById('area-covered').textContent = '0%';
             var path = generateZigzagPath(polygon, mockDrone.sprayWidth);
             animateDrone(path, area, fertilizerRequired, droneCapacity);
-            document.getElementById('alert-list').innerHTML += '<li>Starting simulation...</li>';
+            document.getElementById('alert-list').innerHTML += `<li>Starting simulation (Speed: ${mockDrone.speed} m/s).</li>`;
         });
 
-        // Existing start/end flight buttons (unchanged functionality)
+        // Placeholder start/end flight buttons
         document.getElementById('start-flight-btn').addEventListener('click', function() {
-            document.getElementById('alert-list').innerHTML += '<li>Flight started (placeholder).</li>';
+            document.getElementById('alert-list').innerHTML += `<li>Flight started (placeholder).</li>`;
         });
 
         document.getElementById('end-flight-btn').addEventListener('click', function() {
-            document.getElementById('alert-list').innerHTML += '<li>Flight ended (placeholder).</li>';
+            document.getElementById('alert-list').innerHTML += `<li>Flight ended (placeholder).</li>`;
         });
     </script>
 </body>
