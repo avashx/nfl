@@ -410,6 +410,27 @@
             color: white;
         }
 
+        #simulate-flight-btn {
+            display: block;
+            margin: 10px auto;
+            font-size: 18px;
+            height: 50px;
+            padding: 0 40px;
+            background: #ffc107;
+            border: 2px solid #ffffff;
+            color: #000000;
+        }
+
+        #simulate-flight-btn:hover {
+            background: #ffca2c;
+            color: #000000;
+        }
+
+        #simulate-flight-btn:active {
+            background: #e0a800;
+            color: #000000;
+        }
+
         .drone-controls {
             display: flex;
             justify-content: center;
@@ -491,6 +512,7 @@
             width: 32px;
             height: 32px;
             animation: rotate 2s linear infinite;
+            transform-origin: center;
         }
 
         @keyframes rotate {
@@ -912,7 +934,7 @@
 
             function getDirection(current, next) {
                 if (!next) return lastDirection;
-                return current[1] < next[1] ? 'Left to Right' : 'Right to Left';
+                return current[1] < next[1] ? 'West to East' : 'East to West';
             }
 
             function instantRefill() {
@@ -921,7 +943,7 @@
                 fastRefillBtn.classList.remove('blink');
                 fastRefillBtn.style.background = '#157efb';
                 fastRefillBtn.style.color = 'white';
-                alertList.innerHTML += `<li>Tank refilled instantly (Speed: ${mockDrone.speed} m/s).</li>`;
+                alertList.insertAdjacentHTML('afterbegin', `<li>Tank refilled instantly (Speed: ${mockDrone.speed} m/s).</li>`);
                 returnToField();
             }
 
@@ -940,14 +962,14 @@
                     droneMarker.setLatLng([lat, lng]);
                     if (step >= steps) {
                         clearInterval(interval);
-                        alertList.innerHTML += `<li>Refilling at base station (Speed: ${mockDrone.speed} m/s).</li>`;
+                        alertList.insertAdjacentHTML('afterbegin', `<li>Refilling at base station (Speed: ${mockDrone.speed} m/s).</li>`);
                         setTimeout(() => {
                             tankLevel = droneCapacity;
                             isRefilling = false;
                             fastRefillBtn.classList.remove('blink');
                             fastRefillBtn.style.background = '#157efb';
                             fastRefillBtn.style.color = 'white';
-                            alertList.innerHTML += `<li>Refill complete.</li>`;
+                            alertList.insertAdjacentHTML('afterbegin', `<li>Refill complete.</li>`);
                             callback();
                         }, mockDrone.refillTime * 1000 / speedMultiplier);
                     }
@@ -967,7 +989,7 @@
                     droneMarker.setLatLng([lat, lng]);
                     if (step >= steps) {
                         clearInterval(interval);
-                        alertList.innerHTML += `<li>Returning to field.</li>`;
+                        alertList.insertAdjacentHTML('afterbegin', `<li>Returning to field.</li>`);
                         isRefilling = false;
                         i = lastPathIndex;
                         runAnimation();
@@ -980,7 +1002,7 @@
                     if (i >= path.length) {
                         clearInterval(animation);
                         droneMarker.remove();
-                        alertList.innerHTML += `<li>Fertilization complete!</li>`;
+                        alertList.insertAdjacentHTML('afterbegin', `<li>Fertilization complete!</li>`);
                         updateStats();
                         return;
                     }
@@ -994,7 +1016,7 @@
 
                     var direction = getDirection(path[i], path[i + 1]);
                     if (direction !== lastDirection && direction) {
-                        alertList.innerHTML += `<li>Drone moving ${direction} (Speed: ${mockDrone.speed} m/s).</li>`;
+                        alertList.insertAdjacentHTML('afterbegin', `<li>Drone moving ${direction} (Speed: ${mockDrone.speed} m/s).</li>`);
                         lastDirection = direction;
                     }
 
@@ -1015,7 +1037,7 @@
                         clearInterval(animation);
                         lastPathIndex = i;
                         lastPathPoint = path[i];
-                        alertList.innerHTML += `<li>Moving to base station for refill (Speed: ${mockDrone.speed} m/s).</li>`;
+                        alertList.insertAdjacentHTML('afterbegin', `<li>Moving to base station for refill (Speed: ${mockDrone.speed} m/s).</li>`);
                         isRefilling = true;
                         moveToBaseStation(() => {
                             returnToField();
@@ -1030,7 +1052,7 @@
                 // Fast forward toggle
                 document.getElementById('fast-forward-btn').onclick = () => {
                     speedMultiplier = speedMultiplier === 1 ? 5 : 1;
-                    alertList.innerHTML += `<li>Simulation speed: ${speedMultiplier}x.</li>`;
+                    alertList.insertAdjacentHTML('afterbegin', `<li>Simulation speed: ${speedMultiplier}x.</li>`);
                     clearInterval(animation);
                     runAnimation();
                 };
@@ -1052,7 +1074,7 @@
                     droneMarker.remove();
                     sprayedLayer.clearLayers();
                     document.getElementById('area-covered').textContent = '0%';
-                    alertList.innerHTML += `<li>Simulation stopped.</li>`;
+                    alertList.insertAdjacentHTML('afterbegin', `<li>Simulation stopped.</li>`);
                     if (isRefilling) {
                         isRefilling = false;
                         fastRefillBtn.classList.remove('blink');
@@ -1149,11 +1171,11 @@
 
         // Placeholder start/end flight buttons
         document.getElementById('start-flight-btn').addEventListener('click', function() {
-            document.getElementById('alert-list').innerHTML += `<li>Flight started (placeholder).</li>`;
+            document.getElementById('alert-list').insertAdjacentHTML('afterbegin', `<li>Flight started (placeholder).</li>`);
         });
 
         document.getElementById('end-flight-btn').addEventListener('click', function() {
-            document.getElementById('alert-list').innerHTML += `<li>Flight ended (placeholder).</li>`;
+            document.getElementById('alert-list').insertAdjacentHTML('afterbegin', `<li>Flight ended (placeholder).</li>`);
         });
     </script>
 </body>
