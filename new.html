@@ -424,12 +424,12 @@
         .drone-icon {
             width: 32px;
             height: 32px;
-            animation: fly 1s ease-in-out infinite;
+            animation: rotate 2s linear infinite;
         }
 
-        @keyframes fly {
-            0%, 100% { transform: rotate(0deg); }
-            50% { transform: rotate(10deg); }
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -467,12 +467,6 @@
                         <div id="map"></div><br>
                         <center><p class="api">As API is no longer connected most of the function will not work!</p></center>
                     </div>
-                    <div class="control-panel">
-                        <button id="simulate-flight-btn">Simulate Flight</button>
-                        <button id="fast-forward-btn">Fast Forward</button>
-                        <button id="start-flight-btn">Start Flight</button>
-                        <button id="end-flight-btn">End Flight</button>
-                    </div>
                     <div class="data-container">
                         <div class="chart">
                             <h2>Fertilizer Application</h2><br>
@@ -506,7 +500,7 @@
                             </div>
                             <p>Fertilizer Required: <span class="val" id="fertilizer-required">0 L</span></p>
                             <p>Drone Refills Needed: <span class="val" id="drone-refills">0</span></p>
-                            <p>Est. Drone Flight Time: <span class="val" id="flight-time">0 minutes</span></p>
+                            <p>Est. Spray Time: <span class="val" id="spray-time">0 min 0 sec</span></p>
                         </div>
                         <div class="data-table">
                             <h2>Flight Data Logs</h2>
@@ -527,6 +521,12 @@
                             <ul id="alert-list">
                                 <li>All systems normal.</li>
                             </ul>
+                        </div>
+                        <div class="control-panel">
+                            <button id="simulate-flight-btn">Simulate Flight</button>
+                            <button id="fast-forward-btn">Fast Forward</button>
+                            <button id="start-flight-btn">Start Flight</button>
+                            <button id="end-flight-btn">End Flight</button>
                         </div>
                     </div>
                 </div>
@@ -613,7 +613,7 @@
                                 vizElement.style.height = (divElement.offsetWidth * 0.75) + 'px';
                             } else if (divElement.offsetWidth > 500) {
                                 vizElement.style.width = '100%';
-                                vzElement.style.height = (divElement.offsetWidth * 0.75) + 'px';
+                                vizElement.style.height = (divElement.offsetWidth * 0.75) + 'px';
                             } else {
                                 vizElement.style.width = '100%';
                                 vizElement.style.height = '827px';
@@ -705,7 +705,7 @@
     <script>
         // Mock drone data
         const mockDrone = {
-            speed: 5, // m/s
+            speed: 4, // m/s (realistic for agricultural drones)
             sprayRate: 1, // L/min
             sprayWidth: 5, // m
             baseStation: [28.592, 77.349], // lat, lng
@@ -730,10 +730,10 @@
             fillOpacity: 1
         }).addTo(map).bindPopup('Base Station');
 
-        // Drone marker with SVG icon
+        // Drone marker with Font Awesome-inspired SVG
         var droneIcon = L.divIcon({
             className: 'drone-icon',
-            html: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32" height="32"><path fill="red" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 14v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1h-6v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>',
+            html: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="32" height="32"><path fill="red" d="M261.8 4.4c-11.8-5.9-25.9-5.9-37.7 0C115.7 58.5 0 171.8 0 304c0 44.2 35.8 80 80 80h16.3c4.9 0 9.8-.6 14.6-1.7 38.9-9.2 66.7-43.9 66.7-85.1 0-11.8-2.3-23.2-6.7-33.8L128 160H80c-8.8 0-16-7.2-16-16s7.2-16 16-16h80c8.8 0 16 7.2 16 16v16l35.6 89.1c3.6 9 5.4 18.6 5.4 28.2 0 29.4-19.1 54.6-45.7 63.4-1.7.6-3.4 1-5.2 1H80c-26.5 0-48-21.5-48-48s21.5-48 48-48h48l16 32h80c0-88.4-71.6-160-160-160H80c-8.8 0-16-7.2-16-16s7.2-16 16-16h64c97.2 0 176 78.8 176 176h16c0-97.2 78.8-176 176-176h64c8.8 0 16 7.2 16 16s-7.2 16-16 16h-64c-88.4 0-160 71.6-160 160h80l16-32h48c26.5 0 48 21.5 48 48s-21.5 48-48 48h-80.8c-1.8 0-3.5-.5-5.2-1-26.6-8.8-45.7-34-45.7-63.4 0-9.6 1.8-19.2 5.4-28.2L341 160v-16c0-8.8 7.2-16 16-16h80c8.8 0 16 7.2 16 16s-7.2 16-16 16h-48l-43 103.2c-4.3 10.6-6.7 22-6.7 33.8 0 41.2 27.8 75.9 66.7 85.1 4.8 1.1 9.7 1.7 14.6 1.7H432c44.2 0 80-35.8 80-80C512 171.8 396.3 58.5 287.9 4.4c-11.8-5.9-25.9-5.9-37.7 0z"/></svg>',
             iconSize: [32, 32],
             iconAnchor: [16, 16]
         });
@@ -767,10 +767,10 @@
             var latlng = layer.getCenter();
             layer.areaTooltip.setContent(readableArea).setLatLng(latlng);
             document.getElementById('area-display').textContent = readableArea;
-            updateFertilizerAndRefills(area);
+            updateFertilizerAndTime(area);
         }
 
-        function updateFertilizerAndRefills(area) {
+        function updateFertilizerAndTime(area) {
             var cropType = document.getElementById('crop-type');
             var fertilizerRate = parseFloat(cropType.selectedOptions[0].getAttribute('data-fertilizer'));
             var areaInHectares = area / 10000;
@@ -779,9 +779,15 @@
             var droneCapacity = parseInt(document.getElementById('drone-capacity').value);
             var droneRefills = Math.ceil(fertilizerRequired / droneCapacity);
             document.getElementById('drone-refills').textContent = droneRefills;
-            var flightTime = (droneRefills * 7) + (droneRefills * 3);
-            document.getElementById('flight-time').textContent = flightTime + ' min';
-            return { fertilizerRequired, droneCapacity };
+
+            // Calculate spray time: area / (sprayWidth * speed) + refill time
+            var sprayTime = area / (mockDrone.sprayWidth * mockDrone.speed); // seconds
+            sprayTime += droneRefills * mockDrone.refillTime; // Add refill time
+            var minutes = Math.floor(sprayTime / 60);
+            var seconds = Math.round(sprayTime % 60);
+            document.getElementById('spray-time').textContent = `${minutes} min ${seconds} sec`;
+
+            return { fertilizerRequired, droneCapacity, sprayTime };
         }
 
         // Generate zigzag path
@@ -905,7 +911,7 @@
 
                     lastPos = path[i];
                     i++;
-                }, 50 / speedMultiplier);
+                }, 100 / speedMultiplier); // Slower default speed
 
                 // Fast forward toggle
                 document.getElementById('fast-forward-btn').onclick = () => {
@@ -985,18 +991,18 @@
         // Update calculations on dropdown changes
         document.getElementById('crop-type').addEventListener('change', function() {
             var area = L.GeometryUtil.geodesicArea(polygon.getLatLngs()[0]);
-            updateFertilizerAndRefills(area);
+            updateFertilizerAndTime(area);
         });
 
         document.getElementById('drone-capacity').addEventListener('change', function() {
             var area = L.GeometryUtil.geodesicArea(polygon.getLatLngs()[0]);
-            updateFertilizerAndRefills(area);
+            updateFertilizerAndTime(area);
         });
 
         // Simulate flight button
         document.getElementById('simulate-flight-btn').addEventListener('click', function() {
             var area = L.GeometryUtil.geodesicArea(polygon.getLatLngs()[0]);
-            var { fertilizerRequired, droneCapacity } = updateFertilizerAndRefills(area);
+            var { fertilizerRequired, droneCapacity } = updateFertilizerAndTime(area);
             sprayedLayer.clearLayers();
             document.getElementById('area-covered').textContent = '0%';
             var path = generateZigzagPath(polygon, mockDrone.sprayWidth);
