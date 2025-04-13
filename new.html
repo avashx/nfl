@@ -673,7 +673,7 @@
                         var vizElement = divElement.getElementsByTagName('object')[0];
                         if (divElement.offsetWidth > 800) {
                             vizElement.style.width = '100%';
-                            vizElement.style.height = (divElement.offsetWidth * 0.75) + 'px';
+                            vzElement.style.height = (divElement.offsetWidth * 0.75) + 'px';
                         } else if (divElement.offsetWidth > 500) {
                             vizElement.style.width = '100%';
                             vizElement.style.height = (divElement.offsetWidth * 0.75) + 'px';
@@ -754,10 +754,10 @@
             fillOpacity: 1
         }).addTo(map).bindPopup('Base Station');
 
-        // Drone marker with new SVG
+        // Drone marker with provided SVG
         var droneIcon = L.divIcon({
             className: 'drone-icon',
-            html: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32" height="32"><path fill="red" d="M21.5 7.75h-3.27l2.07-2.07a.75.75 0 0 0-1.06-1.06l-2.07 2.07V3.5a.75.75 0 0 0-1.5 0v3.27l-2.07-2.07a.75.75 0 0 0-1.06 1.06l2.07 2.07H2.5a.75.75 0 0 0 0 1.5h12.69l-2.07 2.07a.75.75 0 0 0 1.06 1.06l2.07-2.07v3.27a.75.75 0 0 0 1.5 0v-3.27l2.07 2.07a.75.75 0 0 0 1.06-1.06l-2.07-2.07h3.27a.75.75 0 0 0 0-1.5zM6.5 15.75a.75.75 0 0 0-.75.75v3a.75.75 0 0 0 1.5 0v-3a.75.75 0 0 0-.75-.75zm11 0a.75.75 0 0 0-.75.75v3a.75.75 0 0 0 1.5 0v-3a.75.75 0 0 0-.75-.75z"/></svg>',
+            html: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="red" stroke-linecap="round" stroke-linejoin="round" width="32" height="32" stroke-width="2"><path d="M10 10h4v4h-4z"></path><path d="M10 10l-3.5 -3.5"></path><path d="M9.96 6a3.5 3.5 0 1 0 -3.96 3.96"></path><path d="M14 10l3.5 -3.5"></path><path d="M18 9.96a3.5 3.5 0 1 0 -3.96 -3.96"></path><path d="M14 14l3.5 3.5"></path><path d="M14.04 18a3.5 3.5 0 1 0 3.96 -3.96"></path><path d="M10 14l-3.5 3.5"></path><path d="M6 14.04a3.5 3.5 0 1 0 3.96 3.96"></path></svg>',
             iconSize: [32, 32],
             iconAnchor: [16, 16]
         });
@@ -855,6 +855,8 @@
             var speedMultiplier = 1; // 1x = normal, 5x = fast
             var lastDirection = '';
             var isRefilling = false;
+            var lastPathIndex = 0;
+            var lastPathPoint = path[0];
 
             function updateStats() {
                 var covered = Math.min((totalDistance / (polygonArea / mockDrone.sprayWidth)) * 100, 100);
@@ -869,8 +871,7 @@
             function instantRefill() {
                 tankLevel = droneCapacity;
                 alertList.innerHTML += `<li>Tank refilled instantly (Speed: ${mockDrone.speed} m/s).</li>`;
-                isRefilling = false;
-                runAnimation();
+                returnToField();
             }
 
             function moveToBaseStation(callback) {
@@ -889,12 +890,32 @@
                         alertList.innerHTML += `<li>Refilling at base station (Speed: ${mockDrone.speed} m/s).</li>`;
                         setTimeout(() => {
                             tankLevel = droneCapacity;
-                            alertList.innerHTML += `<li>Refill complete. Resuming flight.</li>`;
-                            isRefilling = false;
+                            alertList.innerHTML += `<li>Refill complete.</li>`;
                             callback();
                         }, mockDrone.refillTime * 1000 / speedMultiplier);
                     }
-                }, 20 / speedMultiplier);
+                }, 20 / speedMultiplier); // 1s travel
+            }
+
+            function returnToField() {
+                var start = droneMarker.getLatLng();
+                var end = L.latLng(lastPathPoint);
+                var steps = 50;
+                var step = 0;
+                var interval = setInterval(() => {
+                    step++;
+                    var t = step / steps;
+                    var lat = start.lat + (end.lat - start.lat) * t;
+                    var lng = start.lng + (end.lng - start.lng) * t;
+                    droneMarker.setLatLng([lat, lng]);
+                    if (step >= steps) {
+                        clearInterval(interval);
+                        alertList.innerHTML += `<li>Returning to field.</li>`;
+                        isRefilling = false;
+                        i = lastPathIndex;
+                        runAnimation();
+                    }
+                }, 20 / speedMultiplier); // 1s return
             }
 
             function runAnimation() {
@@ -935,10 +956,12 @@
 
                     if (tankLevel <= 0 && i < path.length - 1 && !isRefilling) {
                         clearInterval(animation);
-                        alertList.innerHTML += `<li>Tank empty. Returning to base station (Speed: ${mockDrone.speed} m/s).</li>`;
+                        lastPathIndex = i;
+                        lastPathPoint = path[i];
+                        alertList.innerHTML += `<li>Moving to base station for refill (Speed: ${mockDrone.speed} m/s).</li>`;
                         isRefilling = true;
                         moveToBaseStation(() => {
-                            runAnimation();
+                            returnToField();
                         });
                         return;
                     }
@@ -959,6 +982,8 @@
                 document.getElementById('fast-refill-btn').onclick = () => {
                     if (isRefilling || tankLevel <= 0) {
                         clearInterval(animation);
+                        lastPathIndex = i;
+                        lastPathPoint = path[i];
                         droneMarker.setLatLng(mockDrone.baseStation);
                         instantRefill();
                     }
