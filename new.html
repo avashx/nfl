@@ -336,7 +336,7 @@
             background-color: rgba(225,195,205,0.09);
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 10px rgba"
             box-shadow: 5px 7px 12px black;
             backdrop-filter: blur(60px);
         }
@@ -413,22 +413,17 @@
         #simulate-flight-btn {
             display: block;
             margin: 10px auto;
-            font-size: 18px;
-            height: 50px;
+            font-size: 16px;
+            height: 45px;
             padding: 0 40px;
-            background: #ffc107;
+            background: #fffcf3;
             border: 2px solid #ffffff;
             color: #000000;
         }
 
         #simulate-flight-btn:hover {
-            background: #ffca2c;
-            color: #000000;
-        }
-
-        #simulate-flight-btn:active {
-            background: #e0a800;
-            color: #000000;
+            background: #000000;
+            color: #ffffff;
         }
 
         .drone-controls {
@@ -439,30 +434,32 @@
         }
 
         #start-flight-btn {
-            background: #28a745;
+            background: #004d40;
+            color: white;
         }
 
         #start-flight-btn:hover {
-            background: #38c759;
+            background: #00695c;
             color: white;
         }
 
         #start-flight-btn:active {
-            background: #218838;
+            background: #00332b;
             color: white;
         }
 
         #end-flight-btn {
-            background: #dc3545;
+            background: #37474f;
+            color: white;
         }
 
         #end-flight-btn:hover {
-            background: #e4606d;
+            background: #546e7a;
             color: white;
         }
 
         #end-flight-btn:active {
-            background: #c82333;
+            background: #263238;
             color: white;
         }
 
@@ -511,8 +508,21 @@
         .drone-icon {
             width: 32px;
             height: 32px;
+        }
+
+        .header-drone-icon {
+            width: 32px;
+            height: 32px;
+            display: inline-block;
+            vertical-align: middle;
+            margin-left: 10px;
             animation: rotate 2s linear infinite;
             transform-origin: center;
+        }
+
+        .map-header {
+            display: flex;
+            align-items: center;
         }
 
         @keyframes rotate {
@@ -551,7 +561,12 @@
                 <center><p class="warn">Please use big screen to view content properly</p></center>
                 <div class="main-container">
                     <div class="map-container">
-                        <h2>Live Map</h2>
+                        <div class="map-header">
+                            <h2>Live Map</h2>
+                            <div class="header-drone-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="red" stroke-linecap="round" stroke-linejoin="round" width="32" height="32" stroke-width="2"><path d="M10 10h4v4h-4z"></path><path d="M10 10l-3.5 -3.5"></path><path d="M9.96 6a3.5 3.5 0 1 0 -3.96 3.96"></path><path d="M14 10l3.5 -3.5"></path><path d="M18 9.96a3.5 3.5 0 1 0 -3.96 -3.96"></path><path d="M14 14l3.5 3.5"></path><path d="M14.04 18a3.5 3.5 0 1 0 3.96 -3.96"></path><path d="M10 14l-3.5 3.5"></path><path d="M6 14.04a3.5 3.5 0 1 0 3.96 3.96"></path></svg>
+                            </div>
+                        </div>
                         <div id="map"></div><br>
                         <center><p class="api">As API is no longer connected most of the function will not work!</p></center>
                     </div>
@@ -821,7 +836,7 @@
             fillOpacity: 1
         }).addTo(map).bindPopup('Base Station');
 
-        // Drone marker with provided SVG
+        // Drone marker with provided SVG (static on map)
         var droneIcon = L.divIcon({
             className: 'drone-icon',
             html: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="red" stroke-linecap="round" stroke-linejoin="round" width="32" height="32" stroke-width="2"><path d="M10 10h4v4h-4z"></path><path d="M10 10l-3.5 -3.5"></path><path d="M9.96 6a3.5 3.5 0 1 0 -3.96 3.96"></path><path d="M14 10l3.5 -3.5"></path><path d="M18 9.96a3.5 3.5 0 1 0 -3.96 -3.96"></path><path d="M14 14l3.5 3.5"></path><path d="M14.04 18a3.5 3.5 0 1 0 3.96 -3.96"></path><path d="M10 14l-3.5 3.5"></path><path d="M6 14.04a3.5 3.5 0 1 0 3.96 3.96"></path></svg>',
