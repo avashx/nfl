@@ -336,7 +336,6 @@
             background-color: rgba(225,195,205,0.09);
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba"
             box-shadow: 5px 7px 12px black;
             backdrop-filter: blur(60px);
         }
@@ -406,7 +405,6 @@
             padding: 0px 30px;
             border: none;
             border-radius: 5px;
-            background: #157efb;
             color: white;
         }
 
@@ -424,6 +422,36 @@
         #simulate-flight-btn:hover {
             background: #000000;
             color: #ffffff;
+        }
+
+        #fast-forward-btn {
+            background: #455a64;
+            color: white;
+        }
+
+        #fast-forward-btn:hover {
+            background: #607d8b;
+            color: white;
+        }
+
+        #fast-forward-btn:active {
+            background: #37474f;
+            color: white;
+        }
+
+        #fast-refill-btn {
+            background: #4a7043;
+            color: white;
+        }
+
+        #fast-refill-btn:hover {
+            background: #689f38;
+            color: white;
+        }
+
+        #fast-refill-btn:active {
+            background: #3b5e2b;
+            color: white;
         }
 
         .drone-controls {
@@ -473,16 +501,6 @@
             100% { background: #ff0000; color: #ffffff; }
         }
 
-        button:hover {
-            background: #f5f5f5;
-            color: #157efb;
-        }
-
-        button:active {
-            background: #b97ebb;
-            color: white;
-        }
-
         /* Alerts console style */
         .alerts {
             background: #1a1a1a;
@@ -516,8 +534,11 @@
             display: inline-block;
             vertical-align: middle;
             margin-left: 10px;
-            animation: rotate 2s linear infinite;
             transform-origin: center;
+        }
+
+        .header-drone-icon.rotating {
+            animation: rotate 2s linear infinite;
         }
 
         .map-header {
@@ -564,7 +585,7 @@
                         <div class="map-header">
                             <h2>Live Map</h2>
                             <div class="header-drone-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="red" stroke-linecap="round" stroke-linejoin="round" width="32" height="32" stroke-width="2"><path d="M10 10h4v4h-4z"></path><path d="M10 10l-3.5 -3.5"></path><path d="M9.96 6a3.5 3.5 0 1 0 -3.96 3.96"></path><path d="M14 10l3.5 -3.5"></path><path d="M18 9.96a3.5 3.5 0 1 0 -3.96 -3.96"></path><path d="M14 14l3.5 3.5"></path><path d="M14.04 18a3.5 3.5 0 1 0 3.96 -3.96"></path><path d="M10 14l-3.5 3.5"></path><path d="M6 14.04a3.5 3.5 0 1 0 3.96 3.96"></path></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-linecap="round" stroke-linejoin="round" width="32" height="32" stroke-width="2"><path d="M10 10h4v4h-4z"></path><path d="M10 10l-3.5 -3.5"></path><path d="M9.96 6a3.5 3.5 0 1 0 -3.96 3.96"></path><path d="M14 10l3.5 -3.5"></path><path d="M18 9.96a3.5 3.5 0 1 0 -3.96 -3.96"></path><path d="M14 14l3.5 3.5"></path><path d="M14.04 18a3.5 3.5 0 1 0 3.96 -3.96"></path><path d="M10 14l-3.5 3.5"></path><path d="M6 14.04a3.5 3.5 0 1 0 3.96 3.96"></path></svg>
                             </div>
                         </div>
                         <div id="map"></div><br>
@@ -811,10 +832,9 @@
     <script>
         // Mock drone data
         const mockDrone = {
-            speed: 4, // m/s (realistic for agricultural drones)
+            speed: 2, // m/s (low speed)
             sprayRate: 1, // L/min
             sprayWidth: 5, // m
-            baseStation: [28.592, 77.349], // lat, lng
             refillTime: 30 // seconds
         };
 
@@ -829,8 +849,8 @@
             style: { color: '#00FF00', fillOpacity: 0.5 }
         }).addTo(map);
 
-        // Base station marker
-        var baseStationMarker = L.circleMarker(mockDrone.baseStation, {
+        // Base station marker (initially unset)
+        var baseStationMarker = L.circleMarker([28.592376, 77.349851], {
             radius: 5,
             color: 'blue',
             fillOpacity: 1
@@ -846,6 +866,15 @@
 
         // Initialize drone marker at polygon vertex
         var droneMarker = L.marker([28.591708, 77.348892], { icon: droneIcon });
+
+        // Update base station position
+        function updateBaseStation(polygon) {
+            var center = polygon.getCenter();
+            // Offset 50 meters north (1 degree ≈ 111320 meters)
+            var baseStation = [center.lat + (50 / 111320), center.lng];
+            mockDrone.baseStation = baseStation;
+            baseStationMarker.setLatLng(baseStation);
+        }
 
         // Area tooltip function
         function createAreaTooltip(layer) {
@@ -928,6 +957,8 @@
                 alert('No valid path generated.');
                 return;
             }
+            var headerDroneIcon = document.querySelector('.header-drone-icon');
+            headerDroneIcon.classList.add('rotating');
             droneMarker.setLatLng(path[0]).addTo(map);
             var tankLevel = droneCapacity;
             var totalDistance = 0;
@@ -935,11 +966,12 @@
             var i = 0;
             var lastPos = path[0];
             var alertList = document.getElementById('alert-list');
-            var speedMultiplier = 1; // 1x = normal, 5x = fast
+            var speedMultiplier = 1; // 1x = normal, 2x, 4x
             var lastDirection = '';
             var isRefilling = false;
             var lastPathIndex = 0;
             var lastPathPoint = path[0];
+            var fastForwardBtn = document.getElementById('fast-forward-btn');
             var fastRefillBtn = document.getElementById('fast-refill-btn');
 
             function updateStats() {
@@ -956,7 +988,7 @@
                 tankLevel = droneCapacity;
                 isRefilling = false;
                 fastRefillBtn.classList.remove('blink');
-                fastRefillBtn.style.background = '#157efb';
+                fastRefillBtn.style.background = '#4a7043';
                 fastRefillBtn.style.color = 'white';
                 alertList.insertAdjacentHTML('afterbegin', `<li>Tank refilled instantly (Speed: ${mockDrone.speed} m/s).</li>`);
                 returnToField();
@@ -982,7 +1014,7 @@
                             tankLevel = droneCapacity;
                             isRefilling = false;
                             fastRefillBtn.classList.remove('blink');
-                            fastRefillBtn.style.background = '#157efb';
+                            fastRefillBtn.style.background = '#4a7043';
                             fastRefillBtn.style.color = 'white';
                             alertList.insertAdjacentHTML('afterbegin', `<li>Refill complete.</li>`);
                             callback();
@@ -1017,6 +1049,8 @@
                     if (i >= path.length) {
                         clearInterval(animation);
                         droneMarker.remove();
+                        headerDroneIcon.classList.remove('rotating');
+                        fastForwardBtn.textContent = 'Fast Forward';
                         alertList.insertAdjacentHTML('afterbegin', `<li>Fertilization complete!</li>`);
                         updateStats();
                         return;
@@ -1054,6 +1088,7 @@
                         lastPathPoint = path[i];
                         alertList.insertAdjacentHTML('afterbegin', `<li>Moving to base station for refill (Speed: ${mockDrone.speed} m/s).</li>`);
                         isRefilling = true;
+                        headerDroneIcon.classList.add('rotating');
                         moveToBaseStation(() => {
                             returnToField();
                         });
@@ -1066,7 +1101,14 @@
 
                 // Fast forward toggle
                 document.getElementById('fast-forward-btn').onclick = () => {
-                    speedMultiplier = speedMultiplier === 1 ? 5 : 1;
+                    if (speedMultiplier === 1) {
+                        speedMultiplier = 2;
+                    } else if (speedMultiplier === 2) {
+                        speedMultiplier = 4;
+                    } else {
+                        speedMultiplier = 1;
+                    }
+                    fastForwardBtn.textContent = `Fast Forward (${speedMultiplier}x)`;
                     alertList.insertAdjacentHTML('afterbegin', `<li>Simulation speed: ${speedMultiplier}x.</li>`);
                     clearInterval(animation);
                     runAnimation();
@@ -1079,6 +1121,7 @@
                         lastPathIndex = i;
                         lastPathPoint = path[i];
                         droneMarker.setLatLng(mockDrone.baseStation);
+                        headerDroneIcon.classList.add('rotating');
                         instantRefill();
                     }
                 };
@@ -1088,12 +1131,14 @@
                     clearInterval(animation);
                     droneMarker.remove();
                     sprayedLayer.clearLayers();
+                    headerDroneIcon.classList.remove('rotating');
+                    fastForwardBtn.textContent = 'Fast Forward';
                     document.getElementById('area-covered').textContent = '0%';
                     alertList.insertAdjacentHTML('afterbegin', `<li>Simulation stopped.</li>`);
                     if (isRefilling) {
                         isRefilling = false;
                         fastRefillBtn.classList.remove('blink');
-                        fastRefillBtn.style.background = '#157efb';
+                        fastRefillBtn.style.background = '#4a7043';
                         fastRefillBtn.style.color = 'white';
                     }
                 };
@@ -1110,6 +1155,7 @@
             [28.592376, 77.349851]
         ]).addTo(map);
         createAreaTooltip(polygon);
+        updateBaseStation(polygon);
 
         // Move drone to initial polygon vertex
         droneMarker.setLatLng([28.591708, 77.348892]);
@@ -1146,6 +1192,7 @@
                 polygon = layer;
                 var firstVertex = layer.getLatLngs()[0][0];
                 droneMarker.setLatLng(firstVertex);
+                updateBaseStation(layer);
                 document.getElementById('alert-list').innerHTML = `<li>New field selected. Ready to fertilize.</li>`;
             }
         });
@@ -1158,6 +1205,7 @@
                     document.getElementById('area-covered').textContent = '0%';
                     var firstVertex = layer.getLatLngs()[0][0];
                     droneMarker.setLatLng(firstVertex);
+                    updateBaseStation(layer);
                 }
             });
         });
@@ -1180,6 +1228,7 @@
             sprayedLayer.clearLayers();
             document.getElementById('area-covered').textContent = '0%';
             document.getElementById('alert-list').innerHTML = `<li>Starting simulation (Speed: ${mockDrone.speed} m/s).</li>`;
+            updateBaseStation(polygon);
             var path = generateZigzagPath(polygon, mockDrone.sprayWidth);
             animateDrone(path, area, fertilizerRequired, droneCapacity);
         });
